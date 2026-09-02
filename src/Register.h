@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 
 #define MAX_REG_HANDLERS 5
@@ -24,7 +24,7 @@ struct RegisterHandlerEntry {
 
 class RegisterMQTT {
 public:
-    RegisterMQTT(PubSubClient& client);
+    RegisterMQTT(MQTTClient& client);
 
     void begin(const char* reqTopic, const char* resTopic, const char* macAddress,
                const char* firmwareVersion, const char* hardwareVersion, int bootCount);
@@ -40,7 +40,7 @@ public:
     RegisterResponse lastResponse;
 
 private:
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     const char* _macAddress;

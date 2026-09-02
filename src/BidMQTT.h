@@ -1,7 +1,7 @@
 #ifndef BID_MQTT_H
 #define BID_MQTT_H
 
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <vector>
 #include <string>
@@ -35,7 +35,7 @@ struct BidHandlerEntry {
 
 class BidMQTT {
 public:
-    BidMQTT(PubSubClient& mqttClient);
+    BidMQTT(MQTTClient& mqttClient);
 
     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);
     void loop();
@@ -54,7 +54,7 @@ public:
     BidResponse lastResponse;
 
 private:
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     const char* _deviceId;

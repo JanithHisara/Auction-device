@@ -1,12 +1,12 @@
 #include "Protocol.h"
 
-Protocol::Protocol(PubSubClient& mqttClient) : _mqttClient(mqttClient) {}
+Protocol::Protocol(MQTTClient& mqttClient) : _mqttClient(mqttClient) {}
 
 void Protocol::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
     _reqTopic = reqTopic;
     _resTopic = resTopic;
     _deviceId = String(deviceId);
-    _mqttClient.setBufferSize(4096);
+    // _mqttClient.setBufferSize(4096);
 }
 
 void Protocol::loop() {
@@ -90,7 +90,7 @@ bool Protocol::publish(JsonDocument& doc) {
     Serial.print("📤 Publishing: ");
     Serial.println(buffer);
     
-    return _mqttClient.publish(_reqTopic, buffer, len);
+    return _mqttClient.publish(_reqTopic, buffer, false, 1);
 }
 
 bool Protocol::publishRequest(const char* action, const char* messageId) {
@@ -360,3 +360,4 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
         }
     }
 }
+

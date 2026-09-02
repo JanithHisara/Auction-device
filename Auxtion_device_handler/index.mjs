@@ -271,11 +271,13 @@ export const handler = async (event) => {
           } else {
             response.Status = "FAILED";
             response.Reason = 4; // Not registered for this auction
-          }
+          response.NFC_UID = nfcUid;
+            }
         } else {
           response.Status = "FAILED";
           response.Reason = result.reason;
-        }
+            response.NFC_UID = nfcUid;
+          }
       }
     }
     // ---------- GET ITEMS ----------

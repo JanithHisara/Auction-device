@@ -1,7 +1,7 @@
 #ifndef AUCTION_MQTT_H
 #define AUCTION_MQTT_H
 
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <vector>
 #include <Arduino.h>
@@ -33,7 +33,7 @@ struct HandlerEntry {
 
 class AuctionMQTT {
 public:
-    AuctionMQTT(PubSubClient& mqttClient);
+    AuctionMQTT(MQTTClient& mqttClient);
 
     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);
     void loop();
@@ -45,7 +45,7 @@ public:
     AuctionResponse lastResponse;  // stores last GET_AUCTION response
 
 private:
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     const char* _deviceId;

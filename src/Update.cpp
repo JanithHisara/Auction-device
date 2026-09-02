@@ -1,13 +1,13 @@
 #include "Update.h"
 
-UpdateMQTT::UpdateMQTT(PubSubClient& client)
+UpdateMQTT::UpdateMQTT(MQTTClient& client)
     : _mqttClient(client) {}
 
 void UpdateMQTT::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
     _reqTopic = reqTopic;
     _resTopic = resTopic;
     _deviceId = deviceId;
-    _mqttClient.setBufferSize(4096);
+    // _mqttClient.setBufferSize(4096);
 }
 
 void UpdateMQTT::loop() {
@@ -47,7 +47,7 @@ bool UpdateMQTT::checkUpdate(
     Serial.println("📤 Sending CHECK_UPDATE:");
     Serial.println(buffer);
 
-    return _mqttClient.publish(_reqTopic, buffer);  // Removed length parameter
+    return _mqttClient.publish(_reqTopic, buffer, false, 1);  // Removed length parameter
 }
 /* ---------- Register Handler ---------- */
 void UpdateMQTT::onAction(const char* action, UpdateHandler handler) {

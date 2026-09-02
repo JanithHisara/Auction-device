@@ -1,6 +1,6 @@
 #include "BidMQTT.h"
 
-BidMQTT::BidMQTT(PubSubClient& mqttClient)
+BidMQTT::BidMQTT(MQTTClient& mqttClient)
     : _mqttClient(mqttClient) {}
 
 void BidMQTT::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
@@ -8,7 +8,7 @@ void BidMQTT::begin(const char* reqTopic, const char* resTopic, const char* devi
     _resTopic = resTopic;
     _deviceId = deviceId;
 
-    _mqttClient.setBufferSize(2048); // Enough for bid JSON
+    // _mqttClient.setBufferSize(2048); // Enough for bid JSON
 }
 
 void BidMQTT::loop() {
@@ -39,7 +39,7 @@ bool BidMQTT::submitBid(const char* auctionName, const char* itemId, const char*
     Serial.print("📤 Sending Bid: ");
     Serial.println(buffer);
 
-    return _mqttClient.publish(_reqTopic, buffer);  // Removed length parameter
+    return _mqttClient.publish(_reqTopic, buffer, false, 1);  // Removed length parameter
 }
 
 void BidMQTT::onAction(const char* action, BidHandler handler) {

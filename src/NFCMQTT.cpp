@@ -1,6 +1,6 @@
 #include "NFCMQTT.h"
 
-NFCMQTT::NFCMQTT(PubSubClient& client)
+NFCMQTT::NFCMQTT(MQTTClient& client)
     : _mqttClient(client) {}
 
 void NFCMQTT::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
@@ -8,7 +8,7 @@ void NFCMQTT::begin(const char* reqTopic, const char* resTopic, const char* devi
     _resTopic = resTopic;
     _deviceId = deviceId;
 
-    _mqttClient.setBufferSize(2048);
+    // _mqttClient.setBufferSize(2048);
 }
 
 void NFCMQTT::loop() {
@@ -54,7 +54,7 @@ bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const cha
     Serial.println(buffer);
 
     // Use null-terminated string version
-    bool result = _mqttClient.publish(_reqTopic, buffer);
+    bool result = _mqttClient.publish(_reqTopic, buffer, false, 1);
     
     if (!result) {
         Serial.println("❌ Failed to publish NFC request");

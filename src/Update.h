@@ -2,7 +2,7 @@
 #define UPDATE_MQTT_H
 
 #include <Arduino.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <vector>
 
@@ -31,7 +31,7 @@ struct UpdateResponse {
 
 class UpdateMQTT {
 public:
-    UpdateMQTT(PubSubClient& client);
+    UpdateMQTT(MQTTClient& client);
 
     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);
     void loop();
@@ -50,7 +50,7 @@ public:
     UpdateResponse lastResponse;
 
 private:
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     const char* _deviceId;

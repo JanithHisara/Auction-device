@@ -1,12 +1,12 @@
 #include "ItemsMQTT.h"
 
-ItemsMQTT::ItemsMQTT(PubSubClient& client) : _mqttClient(client) {}
+ItemsMQTT::ItemsMQTT(MQTTClient& client) : _mqttClient(client) {}
 
 void ItemsMQTT::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
     _reqTopic = reqTopic;
     _resTopic = resTopic;
     _deviceId = deviceId;
-    _mqttClient.setBufferSize(4096); // Handle large messages
+    // _mqttClient.setBufferSize(4096); // Handle large messages
 }
 
 void ItemsMQTT::loop() {
@@ -66,12 +66,12 @@ bool ItemsMQTT::publishRequest(const char* auctionName, const char* messageId, c
     Serial.println(buffer);
 
     // Use null-terminated string version
-    bool result = _mqttClient.publish(_reqTopic, buffer);
+    bool result = _mqttClient.publish(_reqTopic, buffer, false, 1);
     
     if (!result) {
         Serial.println("❌ Failed to publish GET_ITEMS request");
         Serial.print("MQTT state: ");
-        Serial.println(_mqttClient.state());
+        Serial.println(_mqttClient.lastError());
     }
     
     return result;

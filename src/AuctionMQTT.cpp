@@ -1,6 +1,6 @@
 #include "AuctionMQTT.h"
 
-AuctionMQTT::AuctionMQTT(PubSubClient& mqttClient)
+AuctionMQTT::AuctionMQTT(MQTTClient& mqttClient)
     : _mqttClient(mqttClient) {}
 
 void AuctionMQTT::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
@@ -8,7 +8,7 @@ void AuctionMQTT::begin(const char* reqTopic, const char* resTopic, const char* 
     _resTopic = resTopic;
     _deviceId = deviceId;
 
-    _mqttClient.setBufferSize(4096); // handle large messages
+    // _mqttClient.setBufferSize(4096); // handle large messages
 }
 
 bool AuctionMQTT::publishRequest(const char* action, const char* messageId) {
@@ -40,7 +40,7 @@ bool AuctionMQTT::publishRequest(const char* action, const char* messageId) {
     Serial.println(buffer);
 
     // Use the version that expects a null-terminated string
-    return _mqttClient.publish(_reqTopic, buffer);
+    return _mqttClient.publish(_reqTopic, buffer, false, 1);
 }
 
 void AuctionMQTT::onAction(const char* action, ActionHandler handler) {

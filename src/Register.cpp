@@ -1,6 +1,6 @@
 #include "Register.h"
 
-RegisterMQTT::RegisterMQTT(PubSubClient& client) : _mqttClient(client) {}
+RegisterMQTT::RegisterMQTT(MQTTClient& client) : _mqttClient(client) {}
 
 void RegisterMQTT::begin(const char* reqTopic, const char* resTopic, const char* macAddress,
                          const char* firmwareVersion, const char* hardwareVersion, int bootCount) {
@@ -11,7 +11,7 @@ void RegisterMQTT::begin(const char* reqTopic, const char* resTopic, const char*
     _hardwareVersion = hardwareVersion;
     _bootCount = bootCount;
 
-    _mqttClient.setBufferSize(1024); // Adjust if needed
+    // _mqttClient.setBufferSize(1024); // Adjust if needed
 }
 
 void RegisterMQTT::loop() {
@@ -40,7 +40,7 @@ bool RegisterMQTT::publishRequest(const char* messageId) {
     Serial.print("📤 Sending DEVICE_REGISTER request: ");
     Serial.println(buffer);
 
-    return _mqttClient.publish(_reqTopic, buffer);  // Removed length parameter
+    return _mqttClient.publish(_reqTopic, buffer, false, 1);  // Removed length parameter
 }
 
 void RegisterMQTT::onAction(const char* action, RegisterHandler handler) {

@@ -1,7 +1,7 @@
 #ifndef ITEMS_MQTT_H
 #define ITEMS_MQTT_H
 
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <vector>
 #include <string>
@@ -32,7 +32,7 @@ typedef void (*ItemsHandler)(JsonDocument& doc);
 
 class ItemsMQTT {
 public:
-    ItemsMQTT(PubSubClient& client);
+    ItemsMQTT(MQTTClient& client);
 
     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);
     void loop();
@@ -45,7 +45,7 @@ public:
     GetItemsResponse lastResponse;
 
 private:
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     const char* _deviceId;

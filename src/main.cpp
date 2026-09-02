@@ -2,7 +2,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <logo.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <LVGLScreen.h>
 #include <tft_init.h>
 #include <Header_template.h>
@@ -73,7 +73,7 @@ String hardwareVersion = "1.0";
 Spinner spinner;
 IPAddress ip;
 WiFiClientSecure net;
-PubSubClient mqttClient(net);
+MQTTClient mqttClient(4096);
 // AP Mode
 APMode apMode("AuctionHub", "12345678");
 Preferences preferences;
@@ -256,7 +256,7 @@ void verify_and_proceed();
 
 // ------------------ FUNCTION IMPLEMENTATIONS ------------------
 void sendNormalMessage(const char* msg) {
-  if (mqttClient.publish(AUCTION_REQ_TOPIC.c_str(), msg)) {
+  if (mqttClient.publish(AUCTION_REQ_TOPIC.c_str(), msg, false, 1)) {
     Serial.print("Normal message sent: ");
     Serial.println(msg);
   } else {
@@ -420,8 +420,8 @@ bool connectMQTT() {
         net.setTimeout(15000);
         net.setHandshakeTimeout(15000);
 
-        mqttClient.setServer(awsEndpoint, 8883);
-        mqttClient.setBufferSize(4096); // Increased for auction messages
+        mqttClient.begin(awsEndpoint, 8883, net);
+        // mqttClient.setBufferSize(4096); // Increased for auction messages
         //mqttClient.setKeepAlive(60); 
         
 
@@ -438,11 +438,11 @@ bool connectMQTT() {
         Serial.println("✅ AWS MQTT Connected");
 
         // Subscribe to device-specific topic
-        mqttClient.subscribe(AUCTION_RES_TOPIC.c_str());
+        mqttClient.subscribe(AUCTION_RES_TOPIC.c_str(), 1);
         Serial.println("Subscribed to specific: " + AUCTION_RES_TOPIC);
         
         // Always independently subscribe to the broadcast topic!
-        mqttClient.subscribe("auction/broadcast");
+        mqttClient.subscribe("auction/broadcast", 1);
         Serial.println("Subscribed to global broadcast: auction/broadcast");
         
         if (true) {
@@ -466,14 +466,14 @@ bool connectMQTT() {
     }
 
     Serial.print("❌ MQTT Failed rc=");
-    Serial.println(mqttClient.state());
+    Serial.println(mqttClient.lastError());
 
     mqttConnected = false;
     return false;
 }
 
 // ------------------ MQTT CALLBACK ------------------
-void mqttCallback(char* topic, byte* payload, unsigned int length) {
+void mqttCallback(MQTTClient *client, char topic[], char payload[], int length) {
     if (strcmp(topic, "auction/broadcast") == 0) {
         String msgId = "SYNC_" + String(millis());
         
@@ -489,10 +489,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
         return;
     }
 
-    auction.handleMessage(topic, payload, length);
-    nfcMqtt.handleMessage(topic, payload, length);
-    items.handleMessage(topic, payload, length);
-    bid.handleMessage(topic, payload, length); // Comment out bid handling for now
+    auction.handleMessage(topic, (byte*)payload, (unsigned int)length);
+    nfcMqtt.handleMessage(topic, (byte*)payload, (unsigned int)length);
+    items.handleMessage(topic, (byte*)payload, (unsigned int)length);
+    bid.handleMessage(topic, (byte*)payload, (unsigned int)length); // Comment out bid handling for now
 }
 
 // ------------------ MQTT HANDLERS ------------------
@@ -552,24 +552,30 @@ void setupMQTTCallbacks() {
             currentUser.active  = true;
             
 
-            if (selectedAuctionId.length() > 0) {
-                currentUI = UI_LOADING_ITEMS;
+                                    if (selectedAuctionId.length() > 0) {
+                String welcomeMsg = "Welcome " + currentUser.userName;
+                show_custom_loading(welcomeMsg.c_str());
+                currentUI = UI_LOADING_ITEMS; // Prevent button presses during the 1.5s delay
                 
-                Serial.println("Access granted - Loading items for auction: " + selectedAuctionId);
-                
-                hide_auction_screen();
-                show_item_screen();   // shows loading label
-
-                // ✅ USE THE LIBRARY METHOD TO PUBLISH GET_ITEMS
-                String msgId = "GET_ITEMS_" + String(millis());
-                
-                if (items.publishRequest(selectedAuctionName.c_str(), msgId.c_str())) {
-                    Serial.println("✅ GET_ITEMS request sent for auction: " + selectedAuctionId);
-                } else {
-                    Serial.println("❌ Failed to send GET_ITEMS request");
-                    show_custom_loading_timeout("\uF071 Failed to load items", 2000);
-                    currentUI = UI_AUCTION;
-                }
+                lv_timer_t* t = lv_timer_create([](lv_timer_t* timer){
+                    if (selectedAuctionId.length() > 0) {
+                        Serial.println("Access granted - Loading items for auction: " + selectedAuctionId);
+                        
+                        hide_auction_screen();
+                        show_item_screen();   // shows loading label
+                        
+                        String msgId = "GET_ITEMS_" + String(millis());
+                        if (items.publishRequest(selectedAuctionName.c_str(), msgId.c_str())) {
+                            Serial.println("o. GET_ITEMS request sent for auction: " + selectedAuctionId);
+                        } else {
+                            Serial.println("?O Failed to send GET_ITEMS request");
+                            show_custom_loading_timeout("\uF071 Failed to load items", 2000);
+                            currentUI = UI_AUCTION;
+                        }
+                    }
+                    lv_timer_del(timer);
+                }, 1500, nullptr);
+                lv_timer_set_repeat_count(t, 1);
             }
         } else {
             Serial.println("Access Denied for UID: " + nfcMqtt.lastResponse.NFC_UID);
@@ -706,7 +712,7 @@ const char* get_current_nfc_uid() {
     return currentUser.uid.c_str();
 }
 void initMQTTHandlers() {
-    mqttClient.setCallback(mqttCallback);
+    mqttClient.onMessageAdvanced(mqttCallback);
    // mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
    // mqttClient.setBufferSize(2048);
 
@@ -1373,6 +1379,24 @@ void changeState(UIState newState) {
     Serial.print(" -> ");
     Serial.println(newState);
 
+    // --- AGGRESSIVE UI CLEANUP ---
+    if (newState == UI_AUCTION) {
+        hide_item_screen();
+        hide_pin_ui();
+        hide_custom_loading();
+        hide_refresh_popup();
+    } else if (newState == UI_WAITING_NFC) {
+        hide_item_screen();
+        hide_auction_screen();
+        hide_pin_ui();
+        hide_refresh_popup();
+    } else if (newState == UI_ITEMS) {
+        hide_auction_screen();
+        hide_pin_ui();
+        hide_custom_loading();
+    }
+    // -----------------------------
+
     currentUI = newState;
     if (newState == UI_WAITING_NFC) {
         show_custom_loading("Scan NFC Card...");
@@ -1635,6 +1659,7 @@ void verify_and_proceed() {
         update_pin_display();
     }
 }
+
 
 
 

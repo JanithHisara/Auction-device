@@ -2,7 +2,7 @@
 #define PROTOCOL_H
 
 #include <Arduino.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <vector>
 #include <functional>
@@ -81,7 +81,7 @@ typedef std::function<void(const BidResult&)> BidHandler;
 
 class Protocol {
 private:
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     String _deviceId;
@@ -164,7 +164,7 @@ public:
         int Reason;
     } lastBidResponse;
     
-    Protocol(PubSubClient& mqttClient);
+    Protocol(MQTTClient& mqttClient);
     
     // Initialization
     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);

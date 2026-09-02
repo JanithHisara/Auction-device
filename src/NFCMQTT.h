@@ -1,7 +1,7 @@
 // #ifndef NFC_MQTT_H
 // #define NFC_MQTT_H
 
-// #include <PubSubClient.h>
+// #include <MQTTClient.h>
 // #include <ArduinoJson.h>
 // #include <Arduino.h>
 
@@ -24,7 +24,7 @@
 
 // class NFCMQTT {
 // public:
-//     NFCMQTT(PubSubClient& client);
+//     NFCMQTT(MQTTClient& client);
 
 //     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);
 //     void loop();
@@ -36,7 +36,7 @@
 //     NFCResponse lastResponse;
 
 // private:
-//     PubSubClient& _mqttClient;
+//     MQTTClient& _mqttClient;
 //     const char* _reqTopic;
 //     const char* _resTopic;
 //     const char* _deviceId;
@@ -57,7 +57,7 @@
 #define NFCMQTT_H
 
 #include <Arduino.h>
-#include <PubSubClient.h>
+#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include <functional>
 
@@ -81,7 +81,7 @@ struct NFCResponse {
 
 class NFCMQTT {
 public:
-    NFCMQTT(PubSubClient& client);
+    NFCMQTT(MQTTClient& client);
     
     void begin(const char* reqTopic, const char* resTopic, const char* deviceId);
     void loop();
@@ -109,7 +109,7 @@ private:
     } handlers[MAX_HANDLERS];
     int handlerCount = 0;
     
-    PubSubClient& _mqttClient;
+    MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
     const char* _deviceId;
