@@ -5,7 +5,7 @@ Protocol::Protocol(MQTTClient& mqttClient) : _mqttClient(mqttClient) {}
 void Protocol::begin(const char* reqTopic, const char* resTopic, const char* deviceId) {
     _reqTopic = reqTopic;
     _resTopic = resTopic;
-    _deviceId = String(deviceId);
+    strlcpy(_deviceId, deviceId, sizeof(_deviceId));
     // _mqttClient.setBufferSize(4096);
 }
 
@@ -18,10 +18,10 @@ bool Protocol::isMessageDuplicate(const char* messageId) {
     
     cleanupRecentMessages();
     unsigned long now = millis();
-    String idStr = String(messageId);
+    const char* idStr = messageId;
     
     for (const auto& msg : _recentMessages) {
-        if (msg.messageId == idStr) {
+        if (strcmp(msg.messageId, idStr) == 0) {
             Serial.print("⚠️ Duplicate message ignored: ");
             Serial.println(messageId);
             return true;
@@ -31,7 +31,7 @@ bool Protocol::isMessageDuplicate(const char* messageId) {
     if (_recentMessages.size() >= MAX_RECENT_MESSAGES) {
         _recentMessages.erase(_recentMessages.begin());
     }
-    _recentMessages.push_back({idStr, now});
+    MessageInfo mi; strlcpy(mi.messageId, idStr, sizeof(mi.messageId)); mi.timestamp = now; _recentMessages.push_back(mi);
     
     return false;
 }
@@ -46,14 +46,13 @@ void Protocol::cleanupRecentMessages() {
         _recentMessages.end());
 }
 
-String Protocol::generateMessageId(const char* prefix) {
+const char* Protocol::generateMessageId(char* outBuffer, size_t maxLen, const char* prefix) {
     static uint32_t counter = 0;
-    char buffer[32];
-    snprintf(buffer, sizeof(buffer), "%s_%04lu_%06lu", 
+    snprintf(outBuffer, maxLen, "%s_%04lu_%06lu", 
              prefix ? prefix : "MSG", 
              (unsigned long)(millis() % 10000), 
              counter++);
-    return String(buffer);
+    return outBuffer;
 }
 
 bool Protocol::publish(JsonDocument& doc) {
@@ -63,7 +62,8 @@ bool Protocol::publish(JsonDocument& doc) {
     }
     
     if (!doc["Message_ID"].is<const char*>()) {
-        doc["Message_ID"] = generateMessageId();
+        char msgBuf[32];
+        doc["Message_ID"] = generateMessageId(msgBuf, sizeof(msgBuf));
     }
     
     if (!doc["Device_ID"].is<const char*>()) {
@@ -152,7 +152,7 @@ void Protocol::onBidResult(BidHandler handler) {
 
 void Protocol::onAction(const char* action, ActionHandler handler) {
     if (_handlerCount < MAX_HANDLERS) {
-        _handlers[_handlerCount++] = {String(action), handler};
+        HandlerEntry entry; strlcpy(entry.action, action, sizeof(entry.action)); entry.handler = handler; _handlers[_handlerCount++] = entry;
     } else {
         Serial.println("⚠️ Maximum handlers reached");
     }
@@ -207,20 +207,20 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     
     // ========== HANDLE GET_AUCTION ==========
     if (strcmp(action, "GET_AUCTION") == 0) {
-        lastResponse.Message_ID = messageId;
-        lastResponse.Status = status;
+        strlcpy(lastResponse.Message_ID, messageId, sizeof(lastResponse.Message_ID));
+        strlcpy(lastResponse.Status, status, sizeof(lastResponse.Status));
         lastResponse.Auctions.clear();
         
         if (strcmp(status, "SUCCESS") == 0 && doc["Auctions"].is<JsonArray>()) {
             JsonArray auctions = doc["Auctions"].as<JsonArray>();
             for (JsonObject auc : auctions) {
                 Auction a;
-                a.Auction_ID = auc["Auction_ID"] | "";
-                a.Name = auc["Name"] | "";
-                a.Auction_Mode = auc["Auction_Mode"] | "";
-                a.Auction_Status = auc["Auction_Status"] | "";
-                a.Start_DateTime = auc["Start_DateTime"] | "";
-                a.End_DateTime = auc["End_DateTime"] | "";
+                strlcpy(a.Auction_ID, auc["Auction_ID"] | "", sizeof(a.Auction_ID));
+                strlcpy(a.Name, auc["Name"] | "", sizeof(a.Name));
+                strlcpy(a.Auction_Mode, auc["Auction_Mode"] | "", sizeof(a.Auction_Mode));
+                strlcpy(a.Auction_Status, auc["Auction_Status"] | "", sizeof(a.Auction_Status));
+                strlcpy(a.Start_DateTime, auc["Start_DateTime"] | "", sizeof(a.Start_DateTime));
+                strlcpy(a.End_DateTime, auc["End_DateTime"] | "", sizeof(a.End_DateTime));
                 a.Items_Count = auc["Items_Count"] | 0;
                 a.Registered_Count = auc["Registered_Count"] | 0;
                 _auctions.push_back(a);
@@ -236,28 +236,28 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     
     // ========== HANDLE CHECK_ACCESS ==========
     else if (strcmp(action, "CHECK_ACCESS") == 0) {
-        lastNFCAccessResponse.Message_ID = messageId;
-        lastNFCAccessResponse.NFC_UID = doc["NFC_UID"] | "";
-        lastNFCAccessResponse.Status = status;
+        strlcpy(lastNFCAccessResponse.Message_ID, messageId, sizeof(lastNFCAccessResponse.Message_ID));
+        strlcpy(lastNFCAccessResponse.NFC_UID, doc["NFC_UID"] | "", sizeof(lastNFCAccessResponse.NFC_UID));
+        strlcpy(lastNFCAccessResponse.Status, status, sizeof(lastNFCAccessResponse.Status));
         
-        _lastNFCAccess.Message_ID = messageId;
-        _lastNFCAccess.NFC_UID = doc["NFC_UID"] | "";
-        _lastNFCAccess.Status = status;
+        strlcpy(_lastNFCAccess.Message_ID, messageId, sizeof(_lastNFCAccess.Message_ID));
+        strlcpy(_lastNFCAccess.NFC_UID, doc["NFC_UID"] | "", sizeof(_lastNFCAccess.NFC_UID));
+        strlcpy(_lastNFCAccess.Status, status, sizeof(_lastNFCAccess.Status));
         _lastNFCAccess.Access.Granted = false;
-        _lastNFCAccess.Access.User_ID = "";
-        _lastNFCAccess.Access.Role = "";
+        _lastNFCAccess.Access.User_ID[0] = '\0';
+        _lastNFCAccess.Access.Role[0] = '\0';
         _lastNFCAccess.Access.Reason = 0;
         
         if (strcmp(status, "SUCCESS") == 0 && doc["Access"].is<JsonObject>()) {
             JsonObject access = doc["Access"];
             bool granted = access["Granted"] | false;
             _lastNFCAccess.Access.Granted = granted;
-            _lastNFCAccess.Access.User_ID = access["User_ID"] | "";
-            _lastNFCAccess.Access.Role = access["Role"] | "";
+            strlcpy(_lastNFCAccess.Access.User_ID, access["User_ID"] | "", sizeof(_lastNFCAccess.Access.User_ID));
+            strlcpy(_lastNFCAccess.Access.Role, access["Role"] | "", sizeof(_lastNFCAccess.Access.Role));
             
             lastNFCAccessResponse.Access.Granted = granted;
-            lastNFCAccessResponse.Access.User_ID = _lastNFCAccess.Access.User_ID;
-            lastNFCAccessResponse.Access.Role = _lastNFCAccess.Access.Role;
+            strlcpy(lastNFCAccessResponse.Access.User_ID, _lastNFCAccess.Access.User_ID, sizeof(lastNFCAccessResponse.Access.User_ID));
+            strlcpy(lastNFCAccessResponse.Access.Role, _lastNFCAccess.Access.Role, sizeof(lastNFCAccessResponse.Access.Role));
         } else {
             _lastNFCAccess.Access.Reason = doc["Reason"] | 0;
             lastNFCAccessResponse.Access.Reason = _lastNFCAccess.Access.Reason;
@@ -273,14 +273,14 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     
     // ========== HANDLE GET_ITEMS ==========
     else if (strcmp(action, "GET_ITEMS") == 0) {
-        String auctionId = doc["Auction_ID"] | "";
-        String auctionMode = doc["Auction_Mode"] | "";
+        const char* auctionId = doc["Auction_ID"] | "";
+        const char* auctionMode = doc["Auction_Mode"] | "";
         
-        lastItemsResponse.Message_ID = messageId;
-        lastItemsResponse.Status = status;
-        lastItemsResponse.Auction_ID = auctionId;
-        lastItemsResponse.Auction_Mode = auctionMode;
-        lastItemsResponse.Auction_Status = doc["Auction_Status"] | "";
+        strlcpy(lastItemsResponse.Message_ID, messageId, sizeof(lastItemsResponse.Message_ID));
+        strlcpy(lastItemsResponse.Status, status, sizeof(lastItemsResponse.Status));
+        strlcpy(lastItemsResponse.Auction_ID, auctionId, sizeof(lastItemsResponse.Auction_ID));
+        strlcpy(lastItemsResponse.Auction_Mode, auctionMode, sizeof(lastItemsResponse.Auction_Mode));
+        strlcpy(lastItemsResponse.Auction_Status, doc["Auction_Status"] | "", sizeof(lastItemsResponse.Auction_Status));
         lastItemsResponse.Items_Count = doc["Items_Count"] | 0;
         lastItemsResponse.Items.clear();
         _items.clear();
@@ -289,17 +289,17 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
             JsonArray items = doc["Items"].as<JsonArray>();
             for (JsonObject it : items) {
                 Item item;
-                item.Item_ID = it["Item_ID"] | "";
-                item.Name = it["Name"] | "";
-                item.Status = it["Status"] | "";
-                item.Currency = it["Currency"] | "";
-                item.End_DateTime = it["End_DateTime"] | "";
+                strlcpy(item.Item_ID, it["Item_ID"] | "", sizeof(item.Item_ID));
+                strlcpy(item.Name, it["Name"] | "", sizeof(item.Name));
+                strlcpy(item.Status, it["Status"] | "", sizeof(item.Status));
+                strlcpy(item.Currency, it["Currency"] | "", sizeof(item.Currency));
+                strlcpy(item.End_DateTime, it["End_DateTime"] | "", sizeof(item.End_DateTime));
                 item.Remaining_Seconds = it["Remaining_Seconds"] | 0;
                 
-                if (auctionMode == "ENGLISH" || auctionMode == "OPEN" || auctionMode == "English auction" || auctionMode == "Progressive elimination") {
+                if (strcmp(auctionMode, "ENGLISH") == 0 || strcmp(auctionMode, "OPEN") == 0 || strcmp(auctionMode, "English auction") == 0 || strcmp(auctionMode, "Progressive elimination") == 0) {
                     item.Current_Price = it["Current_Price"] | 0.0;
                     item.Next_Min_Bid = it["Next_Min_Bid"] | 0.0;
-                } else if (auctionMode == "CLOSED" || auctionMode == "TENDER" || auctionMode == "Sealed bid auction") {
+                } else if (strcmp(auctionMode, "CLOSED") == 0 || strcmp(auctionMode, "TENDER") == 0 || strcmp(auctionMode, "Sealed bid auction") == 0) {
                     item.Your_Bid_Submitted = it["Your_Bid_Submitted"] | false;
                 }
                 
@@ -308,7 +308,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
             }
             
             Serial.printf("✅ Received %d items for auction %s\n", 
-                          _items.size(), auctionId.c_str());
+                          _items.size(), auctionId);
             
             if (_itemsHandler) {
                 _itemsHandler(_items, auctionId, auctionMode);
@@ -318,34 +318,34 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     
     // ========== HANDLE SUBMIT_BID ==========
     else if (strcmp(action, "SUBMIT_BID") == 0) {
-        lastBidResponse.Message_ID = messageId;
-        lastBidResponse.Status = status;
-        lastBidResponse.Auction_ID = doc["Auction_ID"] | "";
-        lastBidResponse.Auction_Mode = doc["Auction_Mode"] | "";
-        lastBidResponse.Auction_Status = doc["Auction_Status"] | "";
-        lastBidResponse.Item_ID = doc["Item_ID"] | "";
-        lastBidResponse.NFC_UID = doc["NFC_UID"] | "";
-        lastBidResponse.Bid_Status = doc["Bid_Status"] | "";
+        strlcpy(lastBidResponse.Message_ID, messageId, sizeof(lastBidResponse.Message_ID));
+        strlcpy(lastBidResponse.Status, status, sizeof(lastBidResponse.Status));
+        strlcpy(lastBidResponse.Auction_ID, doc["Auction_ID"] | "", sizeof(lastBidResponse.Auction_ID));
+        strlcpy(lastBidResponse.Auction_Mode, doc["Auction_Mode"] | "", sizeof(lastBidResponse.Auction_Mode));
+        strlcpy(lastBidResponse.Auction_Status, doc["Auction_Status"] | "", sizeof(lastBidResponse.Auction_Status));
+        strlcpy(lastBidResponse.Item_ID, doc["Item_ID"] | "", sizeof(lastBidResponse.Item_ID));
+        strlcpy(lastBidResponse.NFC_UID, doc["NFC_UID"] | "", sizeof(lastBidResponse.NFC_UID));
+        strlcpy(lastBidResponse.Bid_Status, doc["Bid_Status"] | "", sizeof(lastBidResponse.Bid_Status));
         lastBidResponse.Current_Highest_Bid = doc["Current_Highest_Bid"] | 0.0;
         lastBidResponse.Next_Min_Bid = doc["Next_Min_Bid"] | 0.0;
-        lastBidResponse.Currency = doc["Currency"] | "";
+        strlcpy(lastBidResponse.Currency, doc["Currency"] | "", sizeof(lastBidResponse.Currency));
         lastBidResponse.Reason = doc["Reason"] | 0;
         
-        _lastBidResult.Message_ID = messageId;
-        _lastBidResult.Status = status;
-        _lastBidResult.Auction_ID = lastBidResponse.Auction_ID;
-        _lastBidResult.Auction_Mode = lastBidResponse.Auction_Mode;
-        _lastBidResult.Auction_Status = lastBidResponse.Auction_Status;
-        _lastBidResult.Item_ID = lastBidResponse.Item_ID;
-        _lastBidResult.NFC_UID = lastBidResponse.NFC_UID;
-        _lastBidResult.Bid_Status = lastBidResponse.Bid_Status;
+        strlcpy(_lastBidResult.Message_ID, messageId, sizeof(_lastBidResult.Message_ID));
+        strlcpy(_lastBidResult.Status, status, sizeof(_lastBidResult.Status));
+        strlcpy(_lastBidResult.Auction_ID, lastBidResponse.Auction_ID, sizeof(_lastBidResult.Auction_ID));
+        strlcpy(_lastBidResult.Auction_Mode, lastBidResponse.Auction_Mode, sizeof(_lastBidResult.Auction_Mode));
+        strlcpy(_lastBidResult.Auction_Status, lastBidResponse.Auction_Status, sizeof(_lastBidResult.Auction_Status));
+        strlcpy(_lastBidResult.Item_ID, lastBidResponse.Item_ID, sizeof(_lastBidResult.Item_ID));
+        strlcpy(_lastBidResult.NFC_UID, lastBidResponse.NFC_UID, sizeof(_lastBidResult.NFC_UID));
+        strlcpy(_lastBidResult.Bid_Status, lastBidResponse.Bid_Status, sizeof(_lastBidResult.Bid_Status));
         _lastBidResult.Current_Highest_Bid = lastBidResponse.Current_Highest_Bid;
         _lastBidResult.Next_Min_Bid = lastBidResponse.Next_Min_Bid;
-        _lastBidResult.Currency = lastBidResponse.Currency;
+        strlcpy(_lastBidResult.Currency, lastBidResponse.Currency, sizeof(_lastBidResult.Currency));
         _lastBidResult.Reason = lastBidResponse.Reason;
         
         Serial.printf("📥 Bid Result - Status: %s, BidStatus: %s\n", 
-                      status, _lastBidResult.Bid_Status.c_str());
+                      status, _lastBidResult.Bid_Status);
         
         if (_bidHandler) {
             _bidHandler(_lastBidResult);
@@ -354,7 +354,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     
     // ========== CALL REGISTERED HANDLERS ==========
     for (int i = 0; i < _handlerCount; i++) {
-        if (_handlers[i].action == action) {
+        if (strcmp(_handlers[i].action, action) == 0) {
             _handlers[i].handler(doc);
             return;
         }

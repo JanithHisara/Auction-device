@@ -9,12 +9,12 @@
 
 // Match Auction structure from AuctionScreen.h
 struct Auction {
-    String Auction_ID;
-    String Name;
-    String Auction_Mode;
-    String Auction_Status;
-    String Start_DateTime;
-    String End_DateTime;
+    char Auction_ID[64];
+    char Name[64];
+    char Auction_Mode[32];
+    char Auction_Status[32];
+    char Start_DateTime[32];
+    char End_DateTime[32];
     int Items_Count;
     int Registered_Count;
     
@@ -25,24 +25,24 @@ struct Auction {
 struct NFCAccess {
     struct AccessInfo {
         bool Granted;
-        String User_ID;
-        String Role;
+        char User_ID[64];
+        char Role[32];
         int Reason;
     };
     
-    String Message_ID;
-    String NFC_UID;
-    String Status;
+    char Message_ID[64];
+    char NFC_UID[32];
+    char Status[32];
     AccessInfo Access;
 };
 
 // Match Item structure
 struct Item {
-    String Item_ID;
-    String Name;
-    String Status;
-    String Currency;
-    String End_DateTime;
+    char Item_ID[64];
+    char Name[64];
+    char Status[32];
+    char Currency[8];
+    char End_DateTime[32];
     int Remaining_Seconds;
     float Current_Price;
     float Next_Min_Bid;
@@ -54,17 +54,17 @@ struct Item {
 
 // Match BidResult structure
 struct BidResult {
-    String Message_ID;
-    String Status;
-    String Auction_ID;
-    String Auction_Mode;
-    String Auction_Status;
-    String Item_ID;
-    String NFC_UID;
-    String Bid_Status;
+    char Message_ID[64];
+    char Status[32];
+    char Auction_ID[64];
+    char Auction_Mode[32];
+    char Auction_Status[32];
+    char Item_ID[64];
+    char NFC_UID[32];
+    char Bid_Status[32];
     float Current_Highest_Bid;
     float Next_Min_Bid;
-    String Currency;
+    char Currency[8];
     int Reason;
     
     BidResult() : Current_Highest_Bid(0.0), Next_Min_Bid(0.0), Reason(0) {}
@@ -76,7 +76,7 @@ typedef void (*ActionHandler)(JsonDocument& doc);
 // Specialized handler types
 typedef std::function<void(const std::vector<Auction>&)> AuctionsHandler;
 typedef std::function<void(const NFCAccess&)> NFCHandler;
-typedef std::function<void(const std::vector<Item>&, const String&, const String&)> ItemsHandler;
+typedef std::function<void(const std::vector<Item>&, const char*, const char*)> ItemsHandler;
 typedef std::function<void(const BidResult&)> BidHandler;
 
 class Protocol {
@@ -84,7 +84,7 @@ private:
     MQTTClient& _mqttClient;
     const char* _reqTopic;
     const char* _resTopic;
-    String _deviceId;
+    char _deviceId[64];
     
     // Response data storage
     std::vector<Auction> _auctions;
@@ -95,7 +95,7 @@ private:
     // Generic action handlers
     static const int MAX_HANDLERS = 20;
     struct HandlerEntry {
-        String action;
+        char action[32];
         ActionHandler handler;
     };
     HandlerEntry _handlers[MAX_HANDLERS];
@@ -109,7 +109,7 @@ private:
     
     // Message deduplication
     struct MessageInfo {
-        String messageId;
+        char messageId[64];
         unsigned long timestamp;
     };
     std::vector<MessageInfo> _recentMessages;
@@ -122,45 +122,45 @@ private:
 public:
     // Public response structures (for backward compatibility)
     struct {
-        String Message_ID;
-        String Status;
+        char Message_ID[64];
+        char Status[32];
         std::vector<Auction> Auctions;
     } lastResponse;
     
     struct {
-        String Message_ID;
-        String NFC_UID;
-        String Status;
+        char Message_ID[64];
+        char NFC_UID[32];
+        char Status[32];
         struct {
             bool Granted;
-            String User_ID;
-            String Role;
+            char User_ID[64];
+            char Role[32];
             int Reason;
         } Access;
     } lastNFCAccessResponse;
     
     struct {
-        String Message_ID;
-        String Status;
-        String Auction_ID;
-        String Auction_Mode;
-        String Auction_Status;
+        char Message_ID[64];
+        char Status[32];
+        char Auction_ID[64];
+        char Auction_Mode[32];
+        char Auction_Status[32];
         int Items_Count;
         std::vector<Item> Items;
     } lastItemsResponse;
     
     struct {
-        String Message_ID;
-        String Status;
-        String Auction_ID;
-        String Auction_Mode;
-        String Auction_Status;
-        String Item_ID;
-        String NFC_UID;
-        String Bid_Status;
+        char Message_ID[64];
+        char Status[32];
+        char Auction_ID[64];
+        char Auction_Mode[32];
+        char Auction_Status[32];
+        char Item_ID[64];
+        char NFC_UID[32];
+        char Bid_Status[32];
         float Current_Highest_Bid;
         float Next_Min_Bid;
-        String Currency;
+        char Currency[8];
         int Reason;
     } lastBidResponse;
     
@@ -203,7 +203,7 @@ public:
     void handleMessage(char* topic, byte* payload, unsigned int length);
     
     // ==================== UTILITY METHODS ====================
-    static String generateMessageId(const char* prefix = "MSG");
+    static const char* generateMessageId(char* outBuffer, size_t maxLen, const char* prefix = "MSG");
 };
 
 #endif

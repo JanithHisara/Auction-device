@@ -540,9 +540,9 @@ void setupMQTTCallbacks() {
 
         if (nfcMqtt.lastResponse.Access.Granted) {
             Serial.println("Access Granted");
-            Serial.println("User ID: " + nfcMqtt.lastResponse.Access.User_ID);
-            Serial.println("User Name: " + nfcMqtt.lastResponse.Access.User_Name);
-            Serial.println("Role: " + nfcMqtt.lastResponse.Access.Role);
+            Serial.printf("User ID: %s\n", nfcMqtt.lastResponse.Access.User_ID);
+            Serial.printf("User Name: %s\n", nfcMqtt.lastResponse.Access.User_Name);
+            Serial.printf("Role: %s\n", nfcMqtt.lastResponse.Access.Role);
 
             currentUser.uid     = nfcMqtt.lastResponse.NFC_UID;
             currentUser.userId  = nfcMqtt.lastResponse.Access.User_ID;
@@ -559,14 +559,14 @@ void setupMQTTCallbacks() {
                 
                 lv_timer_t* t = lv_timer_create([](lv_timer_t* timer){
                     if (selectedAuctionId.length() > 0) {
-                        Serial.println("Access granted - Loading items for auction: " + selectedAuctionId);
+                        Serial.printf("Access granted - Loading items for auction: %s\n", selectedAuctionId);
                         
                         hide_auction_screen();
                         show_item_screen();   // shows loading label
                         
                         String msgId = "GET_ITEMS_" + String(millis());
                         if (items.publishRequest(selectedAuctionName.c_str(), msgId.c_str())) {
-                            Serial.println("o. GET_ITEMS request sent for auction: " + selectedAuctionId);
+                            Serial.printf("o. GET_ITEMS request sent for auction: %s\n", selectedAuctionId);
                         } else {
                             Serial.println("?O Failed to send GET_ITEMS request");
                             show_custom_loading_timeout("\uF071 Failed to load items", 2000);
@@ -578,7 +578,7 @@ void setupMQTTCallbacks() {
                 lv_timer_set_repeat_count(t, 1);
             }
         } else {
-            Serial.println("Access Denied for UID: " + nfcMqtt.lastResponse.NFC_UID);
+            Serial.printf("Access Denied for UID: %s\n", nfcMqtt.lastResponse.NFC_UID);
             if (currentUI == UI_WAITING_NFC) {
                 show_custom_loading("\uF071 Access Denied");
                 lv_timer_t* t = lv_timer_create([](lv_timer_t* timer){

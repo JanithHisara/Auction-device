@@ -94,8 +94,8 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
         Serial.println(status);
 
         if (strcmp(status, "SUCCESS") == 0) {
-            lastResponse.Message_ID = messageId;
-            lastResponse.Status = status;
+            strlcpy(lastResponse.Message_ID, messageId, sizeof(lastResponse.Message_ID));
+            strlcpy(lastResponse.Status, status, sizeof(lastResponse.Status));
             lastResponse.Auctions.clear();
 
             // Use doc["Auctions"].is<JsonArray>() instead of containsKey
@@ -103,12 +103,12 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
                 JsonArray auctions = doc["Auctions"].as<JsonArray>();
                 for (JsonObject auc : auctions) {
                     Auction a;
-                    a.Auction_ID       = auc["Auction_ID"].as<const char*>();
-                    a.Name             = auc["Name"].as<const char*>();
-                    a.Auction_Mode     = auc["Auction_Mode"].as<const char*>();
-                    a.Auction_Status   = auc["Auction_Status"].as<const char*>();
-                    a.Start_DateTime   = auc["Start_DateTime"].as<const char*>();
-                    a.End_DateTime     = auc["End_DateTime"].as<const char*>();
+                    strlcpy(a.Auction_ID, auc["Auction_ID"] | "", sizeof(a.Auction_ID));
+                    strlcpy(a.Name, auc["Name"] | "", sizeof(a.Name));
+                    strlcpy(a.Auction_Mode, auc["Auction_Mode"] | "", sizeof(a.Auction_Mode));
+                    strlcpy(a.Auction_Status, auc["Auction_Status"] | "", sizeof(a.Auction_Status));
+                    strlcpy(a.Start_DateTime, auc["Start_DateTime"] | "", sizeof(a.Start_DateTime));
+                    strlcpy(a.End_DateTime, auc["End_DateTime"] | "", sizeof(a.End_DateTime));
                     a.Items_Count      = auc["Items_Count"].as<int>();
                     a.Registered_Count = auc["Registered_Count"].as<int>();
                     lastResponse.Auctions.push_back(a);

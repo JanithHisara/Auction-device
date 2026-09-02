@@ -135,7 +135,7 @@ bool SD_Manager::saveBidRecord(const char* auctionId,
 }
 
 // List all bid files like "bids_YYYY-MM-DD.csv"
-void SD_Manager::listBidFiles(String* files, int maxFiles, int& fileCount)
+void SD_Manager::listBidFiles(char files[][64], int maxFiles, int& fileCount)
 {
     fileCount = 0;
 
@@ -154,7 +154,7 @@ void SD_Manager::listBidFiles(String* files, int maxFiles, int& fileCount)
 
         if (!entry.isDirectory() && name.startsWith("bids_") && name.endsWith(".csv")) {
             if (fileCount < maxFiles) {
-                files[fileCount++] = name;
+                strlcpy(files[fileCount++], name.c_str(), 64);
             }
         }
         entry.close();
@@ -163,31 +163,38 @@ void SD_Manager::listBidFiles(String* files, int maxFiles, int& fileCount)
 }
 
 // Read all records from selected bid file
-void SD_Manager::readBidFile(const String& filename, String* records, int maxRecords, int& recordCount)
+void SD_Manager::readBidFile(const char* filename, char records[][256], int maxRecords, int& recordCount)
 {
     recordCount = 0;
 
     if (!_sdReady) return;
 
     if (!SD.exists(filename)) {
-        Serial.println("File not found: " + filename);
+        Serial.printf("File not found: %s\n", filename);
         return;
     }
 
     File file = SD.open(filename);
 
     if (!file) {
-        Serial.println("Failed to open: " + filename);
+        Serial.printf("Failed to open: %s\n", filename);
         return;
     }
 
     while (file.available()) {
-        String line = file.readStringUntil('\n');
-        line.trim();
-        if (line.length() == 0) continue;
+        char line[256];
+        int i = 0;
+        while (file.available() && i < 255) {
+            char c = file.read();
+            if (c == '\n') break;
+            line[i++] = c;
+        }
+        line[i] = '\0';
+        // line.trim() replaced by manual strip if necessary, or assume csv is clean
+        if (strlen(line) == 0) continue;
 
         if (recordCount < maxRecords) {
-            records[recordCount++] = line;
+            strlcpy(records[recordCount++], line, 256);
         } else {
             break;
         }
@@ -196,51 +203,3 @@ void SD_Manager::readBidFile(const String& filename, String* records, int maxRec
     file.close();
 }
 
-// bool SD_Manager::updateBidStatus(const char* auctionId,
-//                                  const char* itemId,
-//                                  const char* newStatus)
-// {
-//     if (!_sdReady) return false;
-
-//     // Open today's CSV
-//     struct tm timeinfo;
-//     if (!getLocalTime(&timeinfo)) return false;
-
-//     char filename[40];
-//     snprintf(filename, sizeof(filename), "/bids_%04d-%02d-%02d.csv",
-//              timeinfo.tm_year + 1900,
-//              timeinfo.tm_mon + 1,
-//              timeinfo.tm_mday);
-
-//     if (!SD.exists(filename)) return false;
-
-//     File file = SD.open(filename, FILE_READ);
-//     File temp = SD.open("/temp.csv", FILE_WRITE);
-//     if (!file || !temp) return false;
-
-//     while (file.available()) {
-//         String line = file.readStringUntil('\n');
-//         line.trim();
-//         if (line.length() == 0) continue;
-
-//         // Match auctionId & itemId in the CSV line
-//         if (line.startsWith(String(auctionId) + "," + String(itemId) + ",")) {
-//             int lastComma = line.lastIndexOf(',');
-//             if (lastComma > 0) {
-//                 line = line.substring(0, lastComma + 1) + String(newStatus);
-//             }
-//         }
-
-//         temp.println(line);
-//     }
-
-//     file.close();
-//     temp.close();
-
-//     SD.remove(filename);
-//     SD.rename("/temp.csv", filename);
-
-//     saveLog(("Bid updated: " + String(auctionId) + "," + String(itemId) + " -> " + String(newStatus)).c_str());
-
-//     return true;
-// }

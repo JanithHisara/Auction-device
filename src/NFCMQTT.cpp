@@ -29,7 +29,7 @@ bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const cha
     }
 
     // Store the UID we're waiting for
-    _pendingUid = String(nfcUid);
+    strlcpy(_pendingUid, nfcUid, sizeof(_pendingUid));
     
     JsonDocument doc;
     doc["Message_ID"] = messageId;
@@ -58,7 +58,7 @@ bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const cha
     
     if (!result) {
         Serial.println("❌ Failed to publish NFC request");
-        _pendingUid = ""; // Clear on failure
+        _pendingUid[0] = '\0'; // Clear on failure
     }
     
     return result;
@@ -118,13 +118,13 @@ void NFCMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     Serial.print("Granted: "); Serial.println(granted);
 
     // CRITICAL: Only process if UID matches
-    if (_pendingUid.length() > 0 && _pendingUid != String(nfcUid)) {
+    if (strlen(_pendingUid) > 0 && strcmp(_pendingUid, nfcUid) != 0) {
         Serial.println("⚠️ UID mismatch - ignoring response (waiting for different card)");
         return;  // Don't process responses for wrong cards
     }
 
     // Clear pending UID since we got a match
-    _pendingUid = "";
+    _pendingUid[0] = '\0';
 
     if (granted) {
         Serial.print("User Name: "); Serial.println(userName);
@@ -132,13 +132,13 @@ void NFCMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     }
 
     // Fill lastResponse template
-    lastResponse.Message_ID = messageId;
-    lastResponse.NFC_UID = nfcUid;
-    lastResponse.Status = status;
+    strlcpy(lastResponse.Message_ID, messageId, sizeof(lastResponse.Message_ID));
+    strlcpy(lastResponse.NFC_UID, nfcUid, sizeof(lastResponse.NFC_UID));
+    strlcpy(lastResponse.Status, status, sizeof(lastResponse.Status));
     lastResponse.Access.Granted = granted;
-    lastResponse.Access.User_ID = userId;
-    lastResponse.Access.User_Name = userName;
-    lastResponse.Access.Role = userRole;
+    strlcpy(lastResponse.Access.User_ID, userId, sizeof(lastResponse.Access.User_ID));
+    strlcpy(lastResponse.Access.User_Name, userName, sizeof(lastResponse.Access.User_Name));
+    strlcpy(lastResponse.Access.Role, userRole, sizeof(lastResponse.Access.Role));
     lastResponse.Access.Reason = reason;
 
     // Call popup close callback if registered

@@ -10,19 +10,19 @@ typedef void (*ActionHandler)(JsonDocument& doc);
 
 // Use the same struct name everywhere
 struct Auction {
-    String Auction_ID;
-    String Name;
-    String Auction_Mode;
-    String Auction_Status;
-    String Start_DateTime;
-    String End_DateTime;
+    char Auction_ID[64];
+    char Name[64];
+    char Auction_Mode[32];
+    char Auction_Status[32];
+    char Start_DateTime[32];
+    char End_DateTime[32];
     int Items_Count;
     int Registered_Count;
 };
 
 struct AuctionResponse {
-    String Message_ID;
-    String Status;
+    char Message_ID[64];
+    char Status[32];
     std::vector<Auction> Auctions;  // Now using Auction consistently
 };
 

@@ -16,7 +16,7 @@ public:
 
 private:
     void handleRoot();
-    bool serveFile(String path);
+    bool serveFile(const char* path);
 
     const char* _ssid;
     const char* _password;

@@ -30,7 +30,7 @@ void APMode::begin() {
 
     // Serve files (CSS/JS/images)
     server.onNotFound([this]() {
-        if (!serveFile(server.uri())) {
+        if (!serveFile(server.uri().c_str())) {
             server.sendHeader("Location", "/");
             server.send(302, "text/plain", "");
         }
@@ -123,16 +123,20 @@ void APMode::begin() {
 }
 
 
-bool APMode::serveFile(String path) {
-    if (path.endsWith("/")) path += "index.html";
+bool APMode::serveFile(const char* path) {
+    if (strlen(path) > 0 && path[strlen(path)-1] == '/') {
+        char fullPath[128];
+        snprintf(fullPath, sizeof(fullPath), "%sindex.html", path);
+        return serveFile(fullPath);
+    }
 
     String contentType = "text/plain";
-    if (path.endsWith(".html")) contentType = "text/html";
-    if (path.endsWith(".css"))  contentType = "text/css";
-    if (path.endsWith(".js"))   contentType = "application/javascript";
-    if (path.endsWith(".png"))  contentType = "image/png";
-    if (path.endsWith(".jpg"))  contentType = "image/jpeg";
-    if (path.endsWith(".ico"))  contentType = "image/x-icon";
+    if (strstr(path, ".html")) contentType = "text/html";
+    if (strstr(path, ".css"))  contentType = "text/css";
+    if (strstr(path, ".js"))   contentType = "application/javascript";
+    if (strstr(path, ".png"))  contentType = "image/png";
+    if (strstr(path, ".jpg"))  contentType = "image/jpeg";
+    if (strstr(path, ".ico"))  contentType = "image/x-icon";
 
     if (LittleFS.exists(path)) {
         File file = LittleFS.open(path, "r");

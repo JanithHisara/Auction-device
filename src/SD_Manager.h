@@ -55,10 +55,10 @@ public:
     // ---------- New Functions for Bid Viewer ----------
     
     // Return list of bid files on SD
-    void listBidFiles(String* files, int maxFiles, int& fileCount);
+    void listBidFiles(char files[][64], int maxFiles, int& fileCount);
 
     // Read all lines of a specific bid file
-    void readBidFile(const String& filename, String* records, int maxRecords, int& recordCount);
+    void readBidFile(const char* filename, char records[][256], int maxRecords, int& recordCount);
 
 private:
     int _sclk;
@@ -69,7 +69,7 @@ private:
 
     bool _sdReady;
 
-    String getTodayFileName();
+    void getTodayFileName(char* buffer, size_t maxLen);
 };
 
 #endif

@@ -93,17 +93,17 @@ void BidMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     Serial.print("Status: "); Serial.println(status);
 
     // Fill lastResponse
-    lastResponse.Message_ID = messageId;
-    lastResponse.Status = status;
-    lastResponse.Auction_Name = auctionName;
-    lastResponse.Auction_Mode = auctionMode;
-    lastResponse.Auction_Status = auctionStatus;
-    lastResponse.Item_ID = itemId;
-    lastResponse.NFC_UID = nfcUid;
-    lastResponse.Bid_Status = bidStatus;
+    strlcpy(lastResponse.Message_ID, messageId, sizeof(lastResponse.Message_ID));
+    strlcpy(lastResponse.Status, status, sizeof(lastResponse.Status));
+    strlcpy(lastResponse.Auction_Name, auctionName, sizeof(lastResponse.Auction_Name));
+    strlcpy(lastResponse.Auction_Mode, auctionMode, sizeof(lastResponse.Auction_Mode));
+    strlcpy(lastResponse.Auction_Status, auctionStatus, sizeof(lastResponse.Auction_Status));
+    strlcpy(lastResponse.Item_ID, itemId, sizeof(lastResponse.Item_ID));
+    strlcpy(lastResponse.NFC_UID, nfcUid, sizeof(lastResponse.NFC_UID));
+    strlcpy(lastResponse.Bid_Status, bidStatus, sizeof(lastResponse.Bid_Status));
     lastResponse.Current_Highest_Bid = currentBid;
     lastResponse.Next_Min_Bid = nextBid;
-    lastResponse.Currency = currency;
+    strlcpy(lastResponse.Currency, currency, sizeof(lastResponse.Currency));
     lastResponse.Reason = reason;
 
     // Call user-registered handlers

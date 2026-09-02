@@ -14,17 +14,17 @@ typedef void (*BidHandler)(JsonDocument& doc);
 
 // Bid template for last response
 struct BidResponse {
-    string Message_ID;
-    string Status;
-    string Auction_Name;
-    string Auction_Mode;
-    string Auction_Status;
-    string Item_ID;
-    string NFC_UID;
-    string Bid_Status;
+    char Message_ID[64];
+    char Status[32];
+    char Auction_Name[64];
+    char Auction_Mode[32];
+    char Auction_Status[32];
+    char Item_ID[64];
+    char NFC_UID[32];
+    char Bid_Status[32];
     float Current_Highest_Bid;
     float Next_Min_Bid;
-    string Currency;
+    char Currency[8];
     int Reason; // Only if FAILED
 };
 

@@ -9,15 +9,15 @@
 
 // struct NFCAccess {
 //     bool Granted;
-//     String User_ID;
-//     String Role;
+//     char User_ID[64];
+//     char Role[32];
 //     int Reason; // if failed
 // };
 
 // struct NFCResponse {
-//     String Message_ID;
-//     String NFC_UID;
-//     String Status;
+//     char Message_ID[64];
+//     char NFC_UID[32];
+//     char Status[32];
 //     NFCAccess Access;
 //     String DateTime;
 // };
@@ -66,16 +66,16 @@ typedef std::function<void(JsonDocument&)> NFCHandler;
 
 struct NFCAccessInfo {
     bool Granted;
-    String User_ID;
-    String User_Name;
-    String Role;
+    char User_ID[64];
+    char User_Name[64];
+    char Role[32];
     int Reason;
 };
 
 struct NFCResponse {
-    String Message_ID;
-    String NFC_UID;
-    String Status;
+    char Message_ID[64];
+    char NFC_UID[32];
+    char Status[32];
     NFCAccessInfo Access;
 };
 
@@ -115,7 +115,7 @@ private:
     const char* _deviceId;
     
     // Store pending UID
-    String _pendingUid = "";
+    char _pendingUid[32] = "";
     
     // Callback pointers
     void (*closePopupCallback)() = NULL;

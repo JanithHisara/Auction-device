@@ -7,23 +7,23 @@
 #include <string>
 
 struct Item {
-    String Item_ID;
-    String Name;
-    String Status;
+    char Item_ID[64];
+    char Name[64];
+    char Status[32];
     double Current_Price = 0.0;
-    String Currency;
+    char Currency[8];
     double Next_Min_Bid = 0.0;   // Only for English auction
-    String End_DateTime;
+    char End_DateTime[32];
     uint32_t Remaining_Seconds = 0;
     bool Your_Bid_Submitted = false; // Only for Closed auction
 };
 
 struct GetItemsResponse {
-    String Message_ID;
-    String Auction_Name;
-    String Auction_Mode;
-    String Auction_Status;
-    String Status;
+    char Message_ID[64];
+    char Auction_Name[64];
+    char Auction_Mode[32];
+    char Auction_Status[32];
+    char Status[32];
     uint32_t Items_Count = 0;
     std::vector<Item> Items;
 };

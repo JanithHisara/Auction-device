@@ -120,11 +120,11 @@ void ItemsMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     Serial.print("Status: "); Serial.println(status);
 
     if (strcmp(status, "SUCCESS") == 0) {
-        lastResponse.Message_ID = messageId;
-        lastResponse.Auction_Name = auctionName;
-        lastResponse.Auction_Mode = auctionMode;
-        lastResponse.Auction_Status = auctionStatus;
-        lastResponse.Status = status;
+        strlcpy(lastResponse.Message_ID, messageId, sizeof(lastResponse.Message_ID));
+        strlcpy(lastResponse.Auction_Name, auctionName, sizeof(lastResponse.Auction_Name));
+        strlcpy(lastResponse.Auction_Mode, auctionMode, sizeof(lastResponse.Auction_Mode));
+        strlcpy(lastResponse.Auction_Status, auctionStatus, sizeof(lastResponse.Auction_Status));
+        strlcpy(lastResponse.Status, status, sizeof(lastResponse.Status));
         lastResponse.Items_Count = doc["Items_Count"] | 0;
         lastResponse.Items.clear();
 
@@ -132,11 +132,11 @@ void ItemsMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
             JsonArray itemsArray = doc["Items"];
             for (JsonObject it : itemsArray) {
                 Item item;
-                item.Item_ID = it["Item_ID"] | "";
-                item.Name = it["Name"] | "";
-                item.Status = it["Status"] | "";
-                item.Currency = it["Currency"] | "";
-                item.End_DateTime = it["End_DateTime"] | "";
+                strlcpy(item.Item_ID, it["Item_ID"] | "", sizeof(item.Item_ID));
+                strlcpy(item.Name, it["Name"] | "", sizeof(item.Name));
+                strlcpy(item.Status, it["Status"] | "", sizeof(item.Status));
+                strlcpy(item.Currency, it["Currency"] | "", sizeof(item.Currency));
+                strlcpy(item.End_DateTime, it["End_DateTime"] | "", sizeof(item.End_DateTime));
                 item.Remaining_Seconds = it["Remaining_Seconds"] | 0;
 
                 if (strcmp(auctionMode, "ENGLISH") == 0 || strcmp(auctionMode, "OPEN") == 0 || strcmp(auctionMode, "English auction") == 0 || strcmp(auctionMode, "Progressive elimination") == 0) {

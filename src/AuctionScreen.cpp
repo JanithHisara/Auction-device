@@ -362,23 +362,23 @@
 
 //     for(int i = 0; i < auction_count; i++) {
 //         // Copy name
-//         strncpy(name_buffers[i], mqtt_auctions[i].Name.c_str(), 31);
+//         strncpy(name_buffers[i], mqtt_auctions[i].Name, 31);
 //         name_buffers[i][31] = '\0';
 
 //         // Copy ID (truncate if too long)
-//         strncpy(id_buffers[i], mqtt_auctions[i].Auction_ID.c_str(), 19);
+//         strncpy(id_buffers[i], mqtt_auctions[i].Auction_ID, 19);
 //         id_buffers[i][19] = '\0';
 
 //         // Copy mode
-//         strncpy(mode_buffers[i], mqtt_auctions[i].Auction_Mode.c_str(), 15);
+//         strncpy(mode_buffers[i], mqtt_auctions[i].Auction_Mode, 15);
 //         mode_buffers[i][15] = '\0';
 
 //         // Copy status
-//         strncpy(status_buffers[i], mqtt_auctions[i].Auction_Status.c_str(),
+//         strncpy(status_buffers[i], mqtt_auctions[i].Auction_Status,
 //         15); status_buffers[i][15] = '\0';
 
 //         // Format date/time nicely
-//         const char* start_datetime = mqtt_auctions[i].Start_DateTime.c_str();
+//         const char* start_datetime = mqtt_auctions[i].Start_DateTime;
 
 //         if(strlen(start_datetime) >= 16) {
 //             // Format as "MM/DD HH:MM"
@@ -1007,23 +1007,23 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
 
   for (int i = 0; i < auction_count; i++) {
     // Copy name
-    strncpy(name_buffers[i], mqtt_auctions[i].Name.c_str(), 35);
+    strncpy(name_buffers[i], mqtt_auctions[i].Name, 35);
     name_buffers[i][35] = '\0';
 
     // Copy ID
-    strncpy(id_buffers[i], mqtt_auctions[i].Auction_ID.c_str(), 23);
+    strncpy(id_buffers[i], mqtt_auctions[i].Auction_ID, 23);
     id_buffers[i][23] = '\0';
 
     // Copy mode
-    strncpy(mode_buffers[i], mqtt_auctions[i].Auction_Mode.c_str(), 35);
+    strncpy(mode_buffers[i], mqtt_auctions[i].Auction_Mode, 35);
     mode_buffers[i][35] = '\0';
 
     // Copy status
-    strncpy(status_buffers[i], mqtt_auctions[i].Auction_Status.c_str(), 23);
+    strncpy(status_buffers[i], mqtt_auctions[i].Auction_Status, 23);
     status_buffers[i][23] = '\0';
 
     // Format start date/time (MM/DD HH:MM)
-    const char *start_datetime = mqtt_auctions[i].Start_DateTime.c_str();
+    const char *start_datetime = mqtt_auctions[i].Start_DateTime;
     if (strlen(start_datetime) >= 16) {
       snprintf(start_datetime_buffers[i], 19, "%.5s %.5s", start_datetime + 5,
                start_datetime + 11);
@@ -1037,7 +1037,7 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
     }
 
     // Format end date/time (MM/DD HH:MM)
-    const char *end_datetime = mqtt_auctions[i].End_DateTime.c_str();
+    const char *end_datetime = mqtt_auctions[i].End_DateTime;
     if (strlen(end_datetime) >= 16) {
       snprintf(end_datetime_buffers[i], 19, "%.5s %.5s", end_datetime + 5,
                end_datetime + 11);
