@@ -1,0 +1,712 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auxtion Hub Portal</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f3f4f6;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 420px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        position: relative;
+    }
+
+    .logo {
+        width: 120px;
+        display: block;
+        margin: 0 auto 15px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        color: #444;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    /* SSID field with Scan button */
+    .ssid-wrap {
+        position: relative;
+    }
+
+    .scan-btn {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #007bff;
+    }
+
+    /* Password field with Show/Hide */
+    .password-wrap {
+        position: relative;
+    }
+
+    .toggle-pass {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #007bff;
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    button {
+        width: 48%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .save-btn { background: #007bff; color: white; }
+    .cancel-btn { background: #e53935; color: white; }
+
+    /* Admin login hyperlink */
+    .admin-login {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 14px;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    /* Modal common */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal.active { display: flex; }
+
+    .modal-content {
+        background: #fff;
+        padding: 25px 20px;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 360px;
+        text-align: center;
+        position: relative;
+    }
+
+    .modal-content h2 { margin-bottom: 20px; }
+
+    .modal-content .close-btn {
+        position: absolute;
+        top: 5px;
+        right: 20px;
+        background: none;
+        color: #e53935; 
+        border: none;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        cursor: pointer;
+        font-weight: bold;
+        line-height: 28px;
+
+    }
+
+    /* Firmware card */
+    .firmware-card {
+        max-width: 420px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        text-align: center;
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <span class="admin-login" onclick="openAdminModal()">Admin Login</span>
+
+    <img src="logo.png" class="logo" alt="Logo">
+    <h2>Auxtion Hub Portal</h2>
+
+
+    <label for="ssid">WiFi Network</label>
+    <div class="ssid-wrap">
+        <input type="text" id="ssid" placeholder="Tap scan to view networks">
+        <span class="scan-btn" onclick="openWifiScan()">Scan</span>
+    </div>
+
+
+    <label>Password</label>
+    <div class="password-wrap">
+        <input type="password" id="password" placeholder="Enter WiFi Password">
+        <span class="toggle-pass" onclick="togglePassword()">Show</span>
+    </div>
+
+
+    <label for="deviceId">Device ID</label>
+    <input type="text" id="deviceId" placeholder="Enter Device ID">
+
+    <div class="btn-group">
+        <button class="save-btn" onclick="saveConfig()">Save</button>
+        <button class="cancel-btn" onclick="cancelConfig()">Cancel</button>
+    </div>
+</div>
+
+
+<div class="modal" id="adminModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeAdminModal()">×</button>
+        <h2>Admin Login</h2>
+        <input type="text" id="adminUser" placeholder="Username">
+        <div class="password-wrap">
+            <input type="password" id="adminPass" placeholder="Password">
+            <span class="toggle-pass" onclick="toggleAdminPassword()">Show</span>
+        </div>
+        <button style="margin-top: 15px;" onclick="adminLogin()">Login</button>
+    </div>
+</div>
+
+
+<div class="modal" id="wifiModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeWifiModal()">×</button>
+        <h2>Select WiFi</h2>
+        <div id="wifiList">Scanning...</div>
+    </div>
+</div>
+
+
+<div class="firmware-card" id="firmwareCard">
+    <h3>Device Firmware</h3>
+    <p>Current Version: <span id="firmwareVersion">1.0.0</span></p>
+    <button onclick="updateFirmware()">Update Firmware</button>
+</div>
+
+<script>
+/* Password toggle */
+function togglePassword() {
+    const pass = document.getElementById("password");
+    const toggle = document.querySelector(".container .toggle-pass");
+    pass.type = pass.type === "password" ? "text" : "password";
+    toggle.textContent = pass.type === "password" ? "Show" : "Hide";
+}
+
+function toggleAdminPassword() {
+    const pass = document.getElementById("adminPass");
+    const toggle = document.querySelector("#adminModal .toggle-pass");
+    pass.type = pass.type === "password" ? "text" : "password";
+    toggle.textContent = pass.type === "password" ? "Show" : "Hide";
+}
+
+/* Admin modal */
+function openAdminModal(){ document.getElementById("adminModal").classList.add("active"); }
+function closeAdminModal(){ document.getElementById("adminModal").classList.remove("active"); }
+
+/* WiFi Scan modal */
+function openWifiScan(){
+    document.getElementById("wifiModal").classList.add("active");
+    scanWifiNetworks();
+}
+function closeWifiModal(){
+    document.getElementById("wifiModal").classList.remove("active");
+}
+
+/* Scan WiFi Networks */
+async function scanWifiNetworks() {
+    const wifiList = document.getElementById("wifiList");
+    wifiList.innerHTML = "Scanning...";
+
+    try {
+        const res = await fetch("/scan");
+        const networks = await res.json();
+
+        wifiList.innerHTML = "";
+        networks.forEach(n => {
+            const div = document.createElement("div");
+            div.style.padding = "10px";
+            div.style.borderBottom = "1px solid #ddd";
+            div.style.cursor = "pointer";
+            div.textContent = `${n.ssid} (${n.rssi} dBm)`;
+            div.onclick = () => {
+                document.getElementById("ssid").value = n.ssid;
+                closeWifiModal();
+            };
+            wifiList.appendChild(div);
+        });
+    } catch (e) {
+        wifiList.innerHTML = "WiFi scan error.";
+    }
+}
+
+/* Admin login */
+function adminLogin(){
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value.trim();
+    if(user === "admin" && pass === "admin@123"){
+        closeAdminModal();
+        document.getElementById("firmwareCard").style.display = "block";
+        alert("Admin login successful!");
+    } else {
+        alert("Invalid credentials!");
+    }
+}
+
+/* Firmware update simulation */
+function updateFirmware() {
+    console.log("Update button clicked");
+    if (!confirm("Are you sure you want to update firmware?")) return;
+
+    fetch("/ota", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: "update"
+    })
+    .then(res => {
+        console.log("Fetch response received", res);
+        if (!res.ok) throw new Error("ESP32 returned error");
+        return res.text();
+    })
+    .then(text => {
+        alert("Firmware updated successfully!");
+        document.getElementById("firmwareVersion").textContent = "1.0.1";
+        console.log("ESP32 OTA response:", text);
+    })
+    .catch(err => {
+        alert("Firmware update failed!");
+        console.error("Fetch error:", err);
+    });
+}
+
+
+
+
+/* Save configuration */
+function saveConfig() {
+    const ssidInput = document.getElementById("ssid");
+    const passInput = document.getElementById("password");
+    const devIdInput = document.getElementById("deviceId");
+
+    const ssid = ssidInput.value.trim();
+    const password = passInput.value.trim();
+    const deviceId = devIdInput.value.trim();
+
+    // Reset borders
+    ssidInput.style.borderColor = "#ddd";
+    passInput.style.borderColor = "#ddd";
+    devIdInput.style.borderColor = "#ddd";
+
+    let error = false;
+
+    if (!ssid) { ssidInput.style.borderColor = "red"; error = true; }
+    if (!password) { passInput.style.borderColor = "red"; error = true; }
+    if (!deviceId) { devIdInput.style.borderColor = "red"; error = true; }
+
+    if (error) {
+        alert("Please fill all fields before saving.");
+        return;
+    }
+
+    fetch("/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ssid, password, deviceId })
+    })
+    .then(() => alert("Configuration Saved! Rebooting..."))
+    .catch(() => alert("Error saving configuration!"));
+}
+
+
+/* Cancel */
+function cancelConfig() {
+    document.getElementById("ssid").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("deviceId").value = "";
+}
+</script>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auxtion Hub Portal</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f3f4f6;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 420px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        position: relative;
+    }
+
+    .logo {
+        width: 120px;
+        display: block;
+        margin: 0 auto 15px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        color: #444;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    .ssid-wrap { position: relative; }
+    .scan-btn {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #007bff;
+    }
+
+    .password-wrap { position: relative; }
+    .toggle-pass {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #007bff;
+    }
+
+    .btn-group { display: flex; justify-content: space-between; }
+    button {
+        width: 48%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .save-btn { background: #007bff; color: white; }
+    .cancel-btn { background: #e53935; color: white; }
+
+    .admin-login {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 14px;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal.active { display: flex; }
+
+    .modal-content {
+        background: #fff;
+        padding: 25px 20px;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 360px;
+        text-align: center;
+        position: relative;
+    }
+
+    .modal-content h2 { margin-bottom: 20px; }
+
+    .modal-content .close-btn {
+        position: absolute;
+        top: 5px;
+        right: 20px;
+        background: none;
+        color: #e53935; 
+        border: none;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        cursor: pointer;
+        font-weight: bold;
+        line-height: 28px;
+    }
+
+    .firmware-card {
+        max-width: 420px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        text-align: center;
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <span class="admin-login" onclick="openAdminModal()">Admin Login</span>
+
+    <img src="logo.png" class="logo" alt="Logo">
+    <h2>Auxtion Hub Portal</h2>
+
+    <label for="ssid">WiFi Network</label>
+    <div class="ssid-wrap">
+        <input type="text" id="ssid" placeholder="Tap scan to view networks">
+        <span class="scan-btn" onclick="openWifiScan()">Scan</span>
+    </div>
+
+    <label>Password</label>
+    <div class="password-wrap">
+        <input type="password" id="password" placeholder="Enter WiFi Password">
+        <span class="toggle-pass" onclick="togglePassword()">Show</span>
+    </div>
+
+    <label for="deviceId">Device ID</label>
+    <input type="text" id="deviceId" placeholder="Enter Device ID">
+
+    <div class="btn-group">
+        <button class="save-btn" onclick="saveConfig()">Save</button>
+        <button class="cancel-btn" onclick="cancelConfig()">Cancel</button>
+    </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="modal" id="adminModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeAdminModal()">×</button>
+        <h2>Admin Login</h2>
+        <input type="text" id="adminUser" placeholder="Username">
+        <div class="password-wrap">
+            <input type="password" id="adminPass" placeholder="Password">
+            <span class="toggle-pass" onclick="toggleAdminPassword()">Show</span>
+        </div>
+        <button style="margin-top: 15px;" onclick="adminLogin()">Login</button>
+    </div>
+</div>
+
+<!-- WiFi Scan Modal -->
+<div class="modal" id="wifiModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeWifiModal()">×</button>
+        <h2>Select WiFi</h2>
+        <div id="wifiList">Scanning...</div>
+    </div>
+</div>
+
+<!-- Firmware Card -->
+<div class="firmware-card" id="firmwareCard">
+    <h3>Device Firmware</h3>
+    <p>Current Version: <span id="firmwareVersion">1.0.0</span></p>
+
+    <!-- Firmware update form
+    <form method="POST" action="/ota" onsubmit="return confirm('Are you sure you want to update firmware?');">
+        <input type="hidden" name="plain" value="update">
+        <button type="submit">Update Firmware</button>
+    </form> -->
+    <form id="otaForm">
+        <input type="hidden" name="plain" value="update">
+        <button type="button" onclick="submitOtaForm()">Update Firmware</button>
+    </form>
+</div>
+
+<script>
+/* Password toggle */
+function togglePassword() {
+    const pass = document.getElementById("password");
+    const toggle = document.querySelector(".container .toggle-pass");
+    pass.type = pass.type === "password" ? "text" : "password";
+    toggle.textContent = pass.type === "password" ? "Show" : "Hide";
+}
+
+function toggleAdminPassword() {
+    const pass = document.getElementById("adminPass");
+    const toggle = document.querySelector("#adminModal .toggle-pass");
+    pass.type = pass.type === "password" ? "text" : "password";
+    toggle.textContent = pass.type === "password" ? "Show" : "Hide";
+}
+
+/* Admin modal */
+function openAdminModal(){ document.getElementById("adminModal").classList.add("active"); }
+function closeAdminModal(){ document.getElementById("adminModal").classList.remove("active"); }
+
+/* WiFi Scan modal */
+function openWifiScan(){
+    document.getElementById("wifiModal").classList.add("active");
+    scanWifiNetworks();
+}
+function closeWifiModal(){
+    document.getElementById("wifiModal").classList.remove("active");
+}
+
+/* Scan WiFi Networks */
+async function scanWifiNetworks() {
+    const wifiList = document.getElementById("wifiList");
+    wifiList.innerHTML = "Scanning...";
+
+    try {
+        const res = await fetch("/scan");
+        const networks = await res.json();
+
+        wifiList.innerHTML = "";
+        networks.forEach(n => {
+            const div = document.createElement("div");
+            div.style.padding = "10px";
+            div.style.borderBottom = "1px solid #ddd";
+            div.style.cursor = "pointer";
+            div.textContent = `${n.ssid} (${n.rssi} dBm)`;
+            div.onclick = () => {
+                document.getElementById("ssid").value = n.ssid;
+                closeWifiModal();
+            };
+            wifiList.appendChild(div);
+        });
+    } catch (e) {
+        wifiList.innerHTML = "WiFi scan error.";
+    }
+}
+
+/* Admin login */
+function adminLogin(){
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value.trim();
+    if(user === "admin" && pass === "admin@123"){
+        closeAdminModal();
+        document.getElementById("firmwareCard").style.display = "block";
+        alert("Admin login successful!");
+    } else {
+        alert("Invalid credentials!");
+    }
+}
+function submitOtaForm(){
+    const form = document.getElementById("otaForm");
+    const formData = new FormData(form);
+
+    fetch("/ota", { method: "POST", body: formData })
+    .then(res => res.text())
+    .then(msg => alert(msg))
+    .catch(err => alert("Error: " + err));
+}
+/* Save configuration */
+function saveConfig() {
+    const ssidInput = document.getElementById("ssid");
+    const passInput = document.getElementById("password");
+    const devIdInput = document.getElementById("deviceId");
+
+    const ssid = ssidInput.value.trim();
+    const password = passInput.value.trim();
+    const deviceId = devIdInput.value.trim();
+
+    ssidInput.style.borderColor = "#ddd";
+    passInput.style.borderColor = "#ddd";
+    devIdInput.style.borderColor = "#ddd";
+
+    let error = false;
+
+    if (!ssid) { ssidInput.style.borderColor = "red"; error = true; }
+    if (!password) { passInput.style.borderColor = "red"; error = true; }
+    if (!deviceId) { devIdInput.style.borderColor = "red"; error = true; }
+
+    if (error) {
+        alert("Please fill all fields before saving.");
+        return;
+    }
+
+    fetch("/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ssid, password, deviceId })
+    })
+    .then(() => alert("Configuration Saved! Rebooting..."))
+    .catch(() => alert("Error saving configuration!"));
+}
+
+/* Cancel */
+function cancelConfig() {
+    document.getElementById("ssid").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("deviceId").value = "";
+}
+</script>
+
+</body>
+</html>
+
