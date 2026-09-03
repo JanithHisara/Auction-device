@@ -1054,6 +1054,10 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
     auction_list[i].items_count = mqtt_auctions[i].Items_Count;
     auction_list[i].registered_count = mqtt_auctions[i].Registered_Count;
 
+    // Copy password
+    strncpy(password_buffers[i], mqtt_auctions[i].Password.c_str(), 4);
+    password_buffers[i][4] = '\0';
+
     // Assign pointers to buffers
     auction_list[i].name = name_buffers[i];
     auction_list[i].id = id_buffers[i];
@@ -1061,7 +1065,6 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
     auction_list[i].status = status_buffers[i];
     auction_list[i].start_datetime = start_datetime_buffers[i];
     auction_list[i].end_datetime = end_datetime_buffers[i];
-    auction_list[i].password = password_buffers[i];
     auction_list[i].password = password_buffers[i];
   }
 
