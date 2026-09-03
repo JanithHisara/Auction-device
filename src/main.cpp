@@ -925,6 +925,8 @@ void handlePinState() {
             pinInput += key;
             Serial.print("PIN Input: ");
             Serial.println(pinInput);
+      Serial.print("Expected PIN: ");
+      Serial.println(expectedPin);
             
             if (currentBox < PIN_LENGTH - 1) {
                 currentBox++;
@@ -1639,6 +1641,8 @@ void update_pin_display() {
 void verify_and_proceed() {
     Serial.print("Verifying PIN: ");
     Serial.println(pinInput);
+      Serial.print("Expected PIN: ");
+      Serial.println(expectedPin);
     if (pinInput == expectedPin) {
         Serial.println("✅ PIN Correct!");
         // Hide PIN UI
