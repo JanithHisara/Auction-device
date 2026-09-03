@@ -132,7 +132,8 @@ export async function updateAuctionCache(fetchAuctionsFn) {
       Start_DateTime: toLocalISOString(auction.auction_start),
       End_DateTime: toLocalISOString(auction.auction_end),
       Items_Count: counts.total,
-      Registered_Count: regUsers
+      Registered_Count: regUsers,
+      Password: auction.password || ""
     });
   });
 
