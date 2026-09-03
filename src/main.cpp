@@ -157,7 +157,7 @@ const unsigned long NFC_CHECK_INTERVAL = 3000; // 3 seconds
 String expectedNfcUid = ""; // Store the expected UID for the current user
 String pinInput = "";
 const int PIN_LENGTH = 4;
-String expectedPin = "4567";
+String expectedPin = "";
 int currentBox = 0;
 bool pinValidated = false;
 

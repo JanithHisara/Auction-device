@@ -111,6 +111,8 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
                     a.End_DateTime     = auc["End_DateTime"].as<const char*>();
                     a.Items_Count      = auc["Items_Count"].as<int>();
                     a.Registered_Count = auc["Registered_Count"].as<int>();
+                    a.Password         = auc["Password"] | "";
+                    a.Password         = auc["Password"] | "";
                     lastResponse.Auctions.push_back(a);
                 }
             }

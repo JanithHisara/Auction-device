@@ -72,6 +72,7 @@ struct AuctionDisplay {
     const char* end_datetime;
     int items_count;
     int registered_count;
+    const char* password;
 };
 
 // ================== GLOBALS ==================

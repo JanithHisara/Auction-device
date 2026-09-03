@@ -1060,6 +1060,8 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
     auction_list[i].status = status_buffers[i];
     auction_list[i].start_datetime = start_datetime_buffers[i];
     auction_list[i].end_datetime = end_datetime_buffers[i];
+    auction_list[i].password = password_buffers[i];
+    auction_list[i].password = password_buffers[i];
   }
 
   refresh_display();
