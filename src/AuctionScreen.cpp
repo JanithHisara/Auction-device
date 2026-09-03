@@ -571,6 +571,7 @@ static char mode_buffers[MAX_AUCTIONS][36];
 static char status_buffers[MAX_AUCTIONS][24];
 static char start_datetime_buffers[MAX_AUCTIONS][24];
 static char end_datetime_buffers[MAX_AUCTIONS][24];
+static char password_buffers[MAX_AUCTIONS][5];
 
 // LVGL Objects
 lv_obj_t *main_card = nullptr;
