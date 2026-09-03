@@ -520,6 +520,7 @@ void setupMQTTCallbacks() {
                 auctionDataLoaded = true;             
                 hide_custom_loading();          
                 hide_refresh_popup();
+                refresh_display();
                 show_auction_screen();
             } else {
                 if (currentUI == UI_AUCTION) {

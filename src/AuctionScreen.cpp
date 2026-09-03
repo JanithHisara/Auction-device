@@ -1068,7 +1068,6 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
     auction_list[i].password = password_buffers[i];
   }
 
-  refresh_display();
   Serial.printf("✅ Loaded %d auctions into RAM\n", auction_count);
 }
 
