@@ -1264,6 +1264,7 @@ void handleAuctionState() {
         selectedAuctionId = auction_list[current_index].id;
         selectedAuctionMode = auction_list[current_index].mode;
         selectedAuctionName = auction_list[current_index].name;
+        expectedPin = auction_list[current_index].password;
         
         Serial.print("Selected Auction: ");
         Serial.println(selectedAuctionId);
