@@ -111,6 +111,12 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
                     strlcpy(a.End_DateTime, auc["End_DateTime"] | "", sizeof(a.End_DateTime));
                     a.Items_Count      = auc["Items_Count"].as<int>();
                     a.Registered_Count = auc["Registered_Count"].as<int>();
+                    a.Password         = auc["Password"] | "";
+                    Serial.print("Parsed Password from MQTT for ");
+                    Serial.print(a.Name);
+                    Serial.print(": ");
+                    Serial.println(a.Password);
+                    a.Password         = auc["Password"] | "";
                     lastResponse.Auctions.push_back(a);
                 }
             }

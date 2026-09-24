@@ -18,6 +18,7 @@ struct Auction {
     char End_DateTime[32];
     int Items_Count;
     int Registered_Count;
+    String Password;
 };
 
 struct AuctionResponse {

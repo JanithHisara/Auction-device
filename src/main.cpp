@@ -157,7 +157,7 @@ const unsigned long NFC_CHECK_INTERVAL = 3000; // 3 seconds
 String expectedNfcUid = ""; // Store the expected UID for the current user
 String pinInput = "";
 const int PIN_LENGTH = 4;
-String expectedPin = "4567";
+String expectedPin = "";
 int currentBox = 0;
 bool pinValidated = false;
 
@@ -520,6 +520,7 @@ void setupMQTTCallbacks() {
                 auctionDataLoaded = true;             
                 hide_custom_loading();          
                 hide_refresh_popup();
+                refresh_display();
                 show_auction_screen();
             } else {
                 if (currentUI == UI_AUCTION) {
@@ -925,6 +926,8 @@ void handlePinState() {
             pinInput += key;
             Serial.print("PIN Input: ");
             Serial.println(pinInput);
+      Serial.print("Expected PIN: ");
+      Serial.println(expectedPin);
             
             if (currentBox < PIN_LENGTH - 1) {
                 currentBox++;
@@ -1262,6 +1265,7 @@ void handleAuctionState() {
         selectedAuctionId = auction_list[current_index].id;
         selectedAuctionMode = auction_list[current_index].mode;
         selectedAuctionName = auction_list[current_index].name;
+        expectedPin = auction_list[current_index].password;
         
         Serial.print("Selected Auction: ");
         Serial.println(selectedAuctionId);
@@ -1639,6 +1643,8 @@ void update_pin_display() {
 void verify_and_proceed() {
     Serial.print("Verifying PIN: ");
     Serial.println(pinInput);
+      Serial.print("Expected PIN: ");
+      Serial.println(expectedPin);
     if (pinInput == expectedPin) {
         Serial.println("✅ PIN Correct!");
         // Hide PIN UI
