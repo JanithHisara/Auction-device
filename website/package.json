@@ -1,0 +1,43 @@
+{
+  "name": "gem-auction",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "sst": "sst",
+    "deploy": "sst deploy",
+    "cdk:synth": "cd cdk && npx cdk synth --profile gem-auction",
+    "cdk:diff": "cd cdk && npx cdk diff --profile gem-auction",
+    "cdk:deploy": "cd cdk && npx cdk deploy --profile gem-auction --require-approval never",
+    "cdk:destroy": "cd cdk && npx cdk destroy --profile gem-auction"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.80.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "decimal.js": "^10.6.0",
+    "dotenv": "^17.4.2",
+    "lucide-react": "^0.555.0",
+    "next": "16.0.10",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "resend": "^6.5.2",
+    "sst": "^3.17.23",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "baseline-browser-mapping": "^2.11.20",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

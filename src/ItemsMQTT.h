@@ -20,7 +20,7 @@ struct Item {
 
 struct GetItemsResponse {
     String Message_ID;
-    String Auction_Name;
+    String Auction_ID;
     String Auction_Mode;
     String Auction_Status;
     String Status;

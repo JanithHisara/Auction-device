@@ -38,7 +38,7 @@ bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const cha
     doc["Msg_Type"]   = "request";
     doc["NFC_UID"]    = nfcUid;
     if (auctionName && strlen(auctionName) > 0) {
-        doc["Auction_Name"] = auctionName;
+        doc["Auction_ID"] = auctionName;
     }
     doc["DateTime"]   = millis();  // Consider using ISO format if needed
 

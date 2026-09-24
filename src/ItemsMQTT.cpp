@@ -53,7 +53,7 @@ bool ItemsMQTT::publishRequest(const char* auctionName, const char* messageId, c
     doc["Action"]     = "GET_ITEMS";
     if (nfcUid && strlen(nfcUid) > 0) doc["NFC_UID"] = nfcUid;
     doc["Msg_Type"]   = "request";
-    doc["Auction_Name"] = auctionName;
+    doc["Auction_ID"] = auctionName;
     doc["DateTime"]   = millis();
 
     char buffer[256];
@@ -116,12 +116,12 @@ void ItemsMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     const char* auctionMode = doc["Auction_Mode"] | "";
     const char* auctionStatus = doc["Auction_Status"] | "";
 
-    Serial.print("🔹 GET_ITEMS Response - Auction_Name: "); Serial.println(auctionName);
+    Serial.print("🔹 GET_ITEMS Response - Auction_ID: "); Serial.println(auctionName);
     Serial.print("Status: "); Serial.println(status);
 
     if (strcmp(status, "SUCCESS") == 0) {
         lastResponse.Message_ID = messageId;
-        lastResponse.Auction_Name = auctionName;
+        lastResponse.Auction_ID = auctionName;
         lastResponse.Auction_Mode = auctionMode;
         lastResponse.Auction_Status = auctionStatus;
         lastResponse.Status = status;

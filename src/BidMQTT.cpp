@@ -25,7 +25,7 @@ bool BidMQTT::submitBid(const char* auctionName, const char* itemId, const char*
     doc["Device_ID"]  = _deviceId;
     doc["Action"]     = "SUBMIT_BID";
     doc["Msg_Type"]   = "request";
-    doc["Auction_Name"] = auctionName;
+    doc["Auction_ID"] = auctionName;
     doc["Item_ID"]    = itemId;
     doc["NFC_UID"]    = nfcUid;
     doc["Bid_Amount"] = bidAmount;
@@ -77,7 +77,7 @@ void BidMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
 
     const char* status = doc["Status"] | "FAILED";
     const char* messageId = doc["Message_ID"] | "";
-    const char* auctionName = doc["Auction_Name"] | "";
+    const char* auctionName = doc["Auction_ID"] | "";
     const char* auctionMode = doc["Auction_Mode"] | "";
     const char* auctionStatus = doc["Auction_Status"] | "";
     const char* itemId = doc["Item_ID"] | "";

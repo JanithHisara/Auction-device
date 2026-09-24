@@ -1,4 +1,4 @@
-#include <Wire.h>
+﻿#include <Wire.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <logo.h>
@@ -215,7 +215,6 @@ String pendingNFCUid = "";
 // Add these global variables for selected auction
 String selectedAuctionId = "";  // Store the currently selected auction ID
 String selectedAuctionMode = ""; // Store the auction mode
-String selectedAuctionName = ""; // Store the auction name
 
 // Add flag to track if item screen is initialized
 bool item_screen_initialized = false;
@@ -330,7 +329,7 @@ void readNFC() {
         // NFC FOR BID CONFIRMATION
         if (currentUI == UI_BID_WAIT_NFC) {
             if (!currentUser.granted || uidStr != currentUser.uid) {
-                Serial.println("❌ NFC card does not match the registered auction participant!");
+                Serial.println("âŒ NFC card does not match the registered auction participant!");
                 show_custom_loading_timeout("Unauthorized Card!", 2000);
                 nfcState = NFC_IDLE;
                 currentUI = UI_ITEMS;
@@ -354,17 +353,17 @@ void readNFC() {
         if (currentUI == UI_WAITING_NFC) {
             show_custom_loading("Verifying...");
             
-            // ✅ PUBLISH NFC CHECK REQUEST HERE
+            // âœ… PUBLISH NFC CHECK REQUEST HERE
             String msgId = "NFC_" + String(millis());
             // Store the UID for later use
             scannedUid = uidStr;            
             // Publish the NFC check request using your NFCMQTT library with selectedAuctionId
-            if (nfcMqtt.checkAccess(uidStr.c_str(), selectedAuctionName.c_str(), msgId.c_str())) {
-                Serial.println("✅ NFC check request published for UID: " + uidStr + " in Auction: " + selectedAuctionName);
+            if (nfcMqtt.checkAccess(uidStr.c_str(), selectedAuctionId.c_str(), msgId.c_str())) {
+                Serial.println("âœ… NFC check request published for UID: " + uidStr + " in Auction: " + selectedAuctionId);
                 nfcState = NFC_WAIT_FOR_RESPONSE;
                 nfcStartTime = millis();
             } else {
-                Serial.println("❌ Failed to publish NFC check request");
+                Serial.println("âŒ Failed to publish NFC check request");
                 show_custom_loading("NFC Publish Failed");
                 lv_timer_t* t = lv_timer_create([](lv_timer_t* timer){
                     if (currentUI == UI_WAITING_NFC) {
@@ -435,7 +434,7 @@ bool connectMQTT() {
 
     if (mqttClient.connect(clientId.c_str())) {
 
-        Serial.println("✅ AWS MQTT Connected");
+        Serial.println("âœ… AWS MQTT Connected");
 
         // Subscribe to device-specific topic
         mqttClient.subscribe(AUCTION_RES_TOPIC.c_str(), 1);
@@ -450,14 +449,14 @@ bool connectMQTT() {
 
             delay(100);
             
-            // ✅ PUBLISH AUCTION REQUEST HERE - AFTER CONNECTION IS CONFIRMED
+            // âœ… PUBLISH AUCTION REQUEST HERE - AFTER CONNECTION IS CONFIRMED
             Serial.println("Publishing initial GET_AUCTION request...");
             String msgId = "INIT_" + String(millis());
             if (auction.publishRequest("GET_AUCTION", msgId.c_str())) {
-                Serial.println("✅ GET_AUCTION published successfully");
+                Serial.println("âœ… GET_AUCTION published successfully");
                 auction_requested = true;
             } else {
-                Serial.println("❌ Failed to publish GET_AUCTION");
+                Serial.println("âŒ Failed to publish GET_AUCTION");
             }
         }
 
@@ -465,7 +464,7 @@ bool connectMQTT() {
         return true;
     }
 
-    Serial.print("❌ MQTT Failed rc=");
+    Serial.print("âŒ MQTT Failed rc=");
     Serial.println(mqttClient.lastError());
 
     mqttConnected = false;
@@ -483,7 +482,7 @@ void mqttCallback(MQTTClient *client, char topic[], char payload[], int length) 
         } 
         else if ((currentUI == UI_ITEMS || currentUI == UI_BID_WAIT_NFC) && selectedAuctionId.length() > 0) {
             // If inside a specific auction, refresh only the items for that auction!
-            items.publishRequest(selectedAuctionName.c_str(), msgId.c_str(), currentUser.uid.c_str());
+            items.publishRequest(selectedAuctionId.c_str(), msgId.c_str(), currentUser.uid.c_str());
         }
         
         return;
@@ -509,7 +508,7 @@ void setupMQTTCallbacks() {
     });
 
     auction.onAction("GET_AUCTION", [](JsonDocument& doc){
-        Serial.println("✅ Auctions received");       
+        Serial.println("âœ… Auctions received");       
                 if (auction.lastResponse.Auctions.size() > 0) {
             update_auctions_from_mqtt(
                 auction.lastResponse.Auctions.data(),
@@ -566,7 +565,7 @@ void setupMQTTCallbacks() {
                         show_item_screen();   // shows loading label
                         
                         String msgId = "GET_ITEMS_" + String(millis());
-                        if (items.publishRequest(selectedAuctionName.c_str(), msgId.c_str())) {
+                        if (items.publishRequest(selectedAuctionId.c_str(), msgId.c_str())) {
                             Serial.println("o. GET_ITEMS request sent for auction: " + selectedAuctionId);
                         } else {
                             Serial.println("?O Failed to send GET_ITEMS request");
@@ -613,9 +612,9 @@ void setupMQTTCallbacks() {
         JsonArray itemsArray = doc["Items"].as<JsonArray>();
 
         // Debug: Print what we received
-        Serial.print("📥 GET_ITEMS Response - Auction_ID: ");
-        if (doc["Auction_Name"].is<const char*>()) {
-            Serial.println(doc["Auction_Name"].as<const char*>());
+        Serial.print("ðŸ“¥ GET_ITEMS Response - Auction_ID: ");
+        if (doc["Auction_ID"].is<const char*>()) {
+            Serial.println(doc["Auction_ID"].as<const char*>());
         } else {
             Serial.println("NOT FOUND");
         }
@@ -626,12 +625,12 @@ void setupMQTTCallbacks() {
         }
 
         // Check if Auction_ID exists in response (with underscore)
-        if (!doc["Auction_Name"].is<const char*>()) {
+        if (!doc["Auction_ID"].is<const char*>()) {
             Serial.println("ERROR: No Auction_ID in response");
             return;
         }
 
-        const char* responseAuctionName = doc["Auction_Name"];
+        const char* responseAuctionName = doc["Auction_ID"];
 
         // Validate auction ID match with the selected one
         Serial.print("Selected Auction ID: ");
@@ -639,7 +638,7 @@ void setupMQTTCallbacks() {
         Serial.print("Response Auction ID: ");
         Serial.println(responseAuctionName);
         
-        if (selectedAuctionName != responseAuctionName) {
+        if (selectedAuctionId != responseAuctionName) {
             Serial.println("Items for wrong auction pushed by AWS. Ignoring...");
             return;
         }
@@ -651,7 +650,7 @@ void setupMQTTCallbacks() {
         bool isClosedBid = (modeUpper.indexOf("CLOSED") >= 0 || modeUpper.indexOf("TENDER") >= 0 || modeUpper.indexOf("FIXED") >= 0 || modeUpper.indexOf("SEALED") >= 0);
 
         set_auction_details(
-            selectedAuctionName.c_str(),
+            selectedAuctionId.c_str(),
             isClosedBid ? AUCTION_MODE_CLOSED_BID : AUCTION_MODE_ENGLISH
         );
 
@@ -680,7 +679,7 @@ void setupMQTTCallbacks() {
     });
     bid.onAction("SUBMIT_BID", [](JsonDocument& doc){
 
-        Serial.println("📥 Bid response received");
+        Serial.println("ðŸ“¥ Bid response received");
 
         const char* status = doc["Status"] | "FAILED";
 
@@ -1231,14 +1230,14 @@ void handleAuctionState() {
     char key = keypad.scan();
     if (key == '#' && (millis() - lastRefreshTime > 1000)) {
         lastRefreshTime = millis();
-        Serial.println("🔄 SW16 (#) pressed: Refreshing auction list...");
+        Serial.println("ðŸ”„ SW16 (#) pressed: Refreshing auction list...");
         show_refresh_popup("Refreshing...");
         String msgId = "REFRESH_" + String(millis());
         if (mqttConnected) {
             auction.publishRequest("GET_AUCTION", msgId.c_str());
-            Serial.println("✅ GET_AUCTION refresh request published");
+            Serial.println("âœ… GET_AUCTION refresh request published");
         } else {
-            Serial.println("⚠️ MQTT not connected, cannot publish refresh request");
+            Serial.println("âš ï¸ MQTT not connected, cannot publish refresh request");
             show_refresh_popup("MQTT Offline");
         }
         return;
@@ -1261,10 +1260,10 @@ void handleAuctionState() {
             return;
         }
         
-        // ✅ STORE AUCTION DETAILS BEFORE SHOWING PIN
+        // âœ… STORE AUCTION DETAILS BEFORE SHOWING PIN
         selectedAuctionId = auction_list[current_index].id;
         selectedAuctionMode = auction_list[current_index].mode;
-        selectedAuctionName = auction_list[current_index].name;
+        selectedAuctionId = auction_list[current_index].name;
         expectedPin = auction_list[current_index].password;
         
         Serial.print("Selected Auction: ");
@@ -1282,7 +1281,7 @@ void handleAuctionState() {
 
         // selectedAuctionId   = auction_list[current_index].id;
         // selectedAuctionMode = auction_list[current_index].mode;
-        // selectedAuctionName = auction_list[current_index].name;
+        // selectedAuctionId = auction_list[current_index].name;
 
         // show_custom_loading("Scan NFC Card...");
         // //sendNormalMessage("Scan NFC Card");
@@ -1329,14 +1328,14 @@ void handleItemsState() {
     char key = keypad.scan();
     if (key == '#' && (millis() - lastItemRefreshTime > 1000)) {
         lastItemRefreshTime = millis();
-        Serial.println("🔄 SW16 (#) pressed: Refreshing items list...");
+        Serial.println("ðŸ”„ SW16 (#) pressed: Refreshing items list...");
         show_refresh_popup("Refreshing...");
         String msgId = "GET_ITEMS_" + String(millis());
         if (mqttConnected && selectedAuctionId.length() > 0) {
-            items.publishRequest(selectedAuctionName.c_str(), msgId.c_str(), currentUser.uid.c_str());
-            Serial.println("✅ GET_ITEMS refresh request published");
+            items.publishRequest(selectedAuctionId.c_str(), msgId.c_str(), currentUser.uid.c_str());
+            Serial.println("âœ… GET_ITEMS refresh request published");
         } else {
-            Serial.println("⚠️ Cannot refresh items: MQTT disconnected or no auction selected");
+            Serial.println("âš ï¸ Cannot refresh items: MQTT disconnected or no auction selected");
             show_refresh_popup("Refresh Failed");
         }
     }
@@ -1414,7 +1413,7 @@ void changeState(UIState newState) {
 void resetAuctionSelection() {
     //selectedAuctionId = "";
     //selectedAuctionMode = "";
-    //selectedAuctionName = "";
+    //selectedAuctionId = "";
     nfcState = NFC_IDLE;
 }
 void checkNfcAvailabilityAndUid() {
@@ -1430,7 +1429,7 @@ void checkNfcAvailabilityAndUid() {
         String currentUid = formatNfcUid(uid, uidLen);
         // Check if UID matches the authenticated user
         if (currentUid != currentUser.uid) {
-            Serial.println("❌ Wrong NFC card detected!");
+            Serial.println("âŒ Wrong NFC card detected!");
             Serial.print("Expected: " + currentUser.uid);
             Serial.print(", Got: " + currentUid);
             cancel_bid();
@@ -1450,7 +1449,7 @@ void checkNfcAvailabilityAndUid() {
         }
     } else {
         // No NFC card detected
-        Serial.println("⚠️ No NFC card detected"); 
+        Serial.println("âš ï¸ No NFC card detected"); 
         
         cancel_bid();
         hide_item_screen();
@@ -1550,7 +1549,7 @@ void show_pin_ui() {
                 
                 lv_obj_t* label = lv_label_create(box);
                 if (label) {
-                    lv_label_set_text(label, "○");
+                    lv_label_set_text(label, "â—‹");
                     lv_obj_set_style_text_font(label, &lv_font_montserrat_14, 0);
                     lv_obj_set_style_text_color(label, lv_color_hex(0xFFFFFF), 0);
                     lv_obj_center(label);
@@ -1615,7 +1614,7 @@ void update_pin_display() {
                 lv_obj_set_style_text_color(pin_boxes[i], lv_color_hex(0x5C9ACF), 0);
                 lv_obj_set_style_text_font(pin_boxes[i], &lv_font_montserrat_14, 0);
             } else {
-                lv_label_set_text(pin_boxes[i], "○");
+                lv_label_set_text(pin_boxes[i], "â—‹");
                 lv_obj_set_style_text_color(pin_boxes[i], lv_color_hex(0x444444), 0);
                 lv_obj_set_style_text_font(pin_boxes[i], &lv_font_montserrat_14, 0);
             }
@@ -1646,14 +1645,14 @@ void verify_and_proceed() {
       Serial.print("Expected PIN: ");
       Serial.println(expectedPin);
     if (pinInput == expectedPin) {
-        Serial.println("✅ PIN Correct!");
+        Serial.println("âœ… PIN Correct!");
         // Hide PIN UI
         hide_pin_ui(); 
         hide_auction_screen();
         // Proceed to next step
         changeState(UI_WAITING_NFC);
     } else {
-        Serial.println("❌ PIN Wrong!"); 
+        Serial.println("âŒ PIN Wrong!"); 
         // Just show error message
         if (pin_message) {
             lv_label_set_text(pin_message, "\uF071 WRONG PIN!");
@@ -1665,6 +1664,8 @@ void verify_and_proceed() {
         update_pin_display();
     }
 }
+
+
 
 
 
