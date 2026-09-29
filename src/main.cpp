@@ -1176,6 +1176,16 @@ void setup() {
 // ------------------ LOOP ------------------
 void loop() {
     
+    // Auto-poll GET_AUCTION every 5 seconds if waiting on 'Auction not live' screen
+    static unsigned long last_live_poll = 0;
+    if (currentUI == UI_LOADING_ITEMS && !selectedAuctionStatus.equalsIgnoreCase("LIVE")) {
+        if (millis() - last_live_poll > 5000) {
+            last_live_poll = millis();
+            String msgId = "SYNC_" + String(millis());
+            auction.publishRequest("GET_AUCTION", msgId.c_str());
+        }
+    }
+
     lv_timer_handler();
     if (refresh_popup_box != nullptr && (millis() - refresh_popup_time > 1500)) {
         hide_refresh_popup();
@@ -1686,6 +1696,7 @@ void verify_and_proceed() {
         update_pin_display();
     }
 }
+
 
 
 
