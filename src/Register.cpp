@@ -35,9 +35,9 @@ bool RegisterMQTT::publishRequest(const char* messageId) {
 
     char buffer[512];
     size_t n = serializeJson(doc, buffer);
-    buffer[n] = '\0';  // ✅ CRITICAL: Null-terminate for MQTT publish
+    buffer[n] = '\0';  //  CRITICAL: Null-terminate for MQTT publish
 
-    Serial.print("📤 Sending DEVICE_REGISTER request: ");
+    Serial.print(" Sending DEVICE_REGISTER request: ");
     Serial.println(buffer);
 
     return _mqttClient.publish(_reqTopic, buffer, false, 1);  // Removed length parameter
@@ -47,7 +47,7 @@ void RegisterMQTT::onAction(const char* action, RegisterHandler handler) {
     if (handlerCount < MAX_REG_HANDLERS) {
         handlers[handlerCount++] = {action, handler};
     } else {
-        Serial.println("⚠️ Max register handlers reached");
+        Serial.println(" Max register handlers reached");
     }
 }
 
@@ -56,7 +56,7 @@ void RegisterMQTT::handleMessage(char* topic, byte* payload, unsigned int length
 
     char* jsonBuffer = (char*)malloc(length + 1);
     if (!jsonBuffer) {
-        Serial.println("❌ Memory allocation failed");
+        Serial.println(" Memory allocation failed");
         return;
     }
 
@@ -68,7 +68,7 @@ void RegisterMQTT::handleMessage(char* topic, byte* payload, unsigned int length
     free(jsonBuffer);
 
     if (err) {
-        Serial.print("❌ JSON parse failed: "); 
+        Serial.print(" JSON parse failed: "); 
         Serial.println(err.c_str());
         return;
     }
@@ -79,7 +79,7 @@ void RegisterMQTT::handleMessage(char* topic, byte* payload, unsigned int length
     const char* status = doc["Status"] | "FAILED";
     const char* messageId = doc["Message_ID"] | "";
 
-    Serial.print("📥 Register Action: "); Serial.println(action);
+    Serial.print(" Register Action: "); Serial.println(action);
     Serial.print("Message_ID: "); Serial.println(messageId);
     Serial.print("Status: "); Serial.println(status);
 

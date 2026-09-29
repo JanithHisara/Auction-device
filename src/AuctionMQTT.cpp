@@ -13,7 +13,7 @@ void AuctionMQTT::begin(const char* reqTopic, const char* resTopic, const char* 
 
 bool AuctionMQTT::publishRequest(const char* action, const char* messageId) {
     if (!_mqttClient.connected()) {
-        Serial.println("⚠️ MQTT not connected, cannot publish");
+        Serial.println(" MQTT not connected, cannot publish");
         return false;
     }
     
@@ -34,9 +34,9 @@ bool AuctionMQTT::publishRequest(const char* action, const char* messageId) {
 
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
-    buffer[n] = '\0';  // ✅ CRITICAL: Null-terminate for MQTT publish
+    buffer[n] = '\0';  //  CRITICAL: Null-terminate for MQTT publish
 
-    Serial.print("📤 Sending: ");
+    Serial.print(" Sending: ");
     Serial.println(buffer);
 
     // Use the version that expects a null-terminated string
@@ -47,7 +47,7 @@ void AuctionMQTT::onAction(const char* action, ActionHandler handler) {
     if (handlerCount < 10) {
         handlers[handlerCount++] = {action, handler};
     } else {
-        Serial.println("⚠️ Maximum handlers reached");
+        Serial.println(" Maximum handlers reached");
     }
 }
 
@@ -55,13 +55,13 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
     if (strcmp(topic, _resTopic) != 0) return; // Only handle subscribed response topic
 
     if (length > 32768) { // 32KB limit
-        Serial.println("❌ Message too large");
+        Serial.println(" Message too large");
         return;
     }
 
     char* jsonBuffer = (char*)malloc(length + 1);
     if (!jsonBuffer) {
-        Serial.println("❌ Memory allocation failed");
+        Serial.println(" Memory allocation failed");
         return;
     }
 
@@ -74,14 +74,14 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
     free(jsonBuffer);
 
     if (err) {
-        Serial.print("❌ JSON parse failed: "); 
+        Serial.print(" JSON parse failed: "); 
         Serial.println(err.c_str());
         return;
     }
 
     const char* action = doc["Action"];
     if (!action) {
-        Serial.println("⚠️ JSON missing Action");
+        Serial.println(" JSON missing Action");
         return;
     }
 
@@ -90,7 +90,7 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
         const char* status = doc["Status"] | "UNKNOWN";
         const char* messageId = doc["Message_ID"] | "";
 
-        Serial.print("📥 GET_AUCTION Received - Status: "); 
+        Serial.print(" GET_AUCTION Received - Status: "); 
         Serial.println(status);
 
         if (strcmp(status, "SUCCESS") == 0) {
@@ -103,12 +103,12 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
                 JsonArray auctions = doc["Auctions"].as<JsonArray>();
                 for (JsonObject auc : auctions) {
                     Auction a;
-                    a.Auction_ID       = auc["Auction_ID"].as<const char*>();
-                    a.Name             = auc["Name"].as<const char*>();
-                    a.Auction_Mode     = auc["Auction_Mode"].as<const char*>();
-                    a.Auction_Status   = auc["Auction_Status"].as<const char*>();
-                    a.Start_DateTime   = auc["Start_DateTime"].as<const char*>();
-                    a.End_DateTime     = auc["End_DateTime"].as<const char*>();
+                    a.Auction_ID = auc["Auction_ID"] | "";
+                    a.Name = auc["Name"] | "";
+                    a.Auction_Mode = auc["Auction_Mode"] | "";
+                    a.Auction_Status = auc["Auction_Status"] | "";
+                    a.Start_DateTime = auc["Start_DateTime"] | "";
+                    a.End_DateTime = auc["End_DateTime"] | "";
                     a.Items_Count      = auc["Items_Count"].as<int>();
                     a.Registered_Count = auc["Registered_Count"].as<int>();
                     a.Password         = auc["Password"] | "";
@@ -131,3 +131,4 @@ void AuctionMQTT::handleMessage(char* topic, byte* payload, unsigned int length)
         }
     }
 }
+

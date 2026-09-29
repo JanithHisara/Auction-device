@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#include <lvgl.h>  // ✅ Include LVGL here
+#include <lvgl.h>  //  Include LVGL here
 
 class TFT_init {
 public:
@@ -29,3 +29,4 @@ private:
 };
 
 #endif // TFT_INIT_H
+

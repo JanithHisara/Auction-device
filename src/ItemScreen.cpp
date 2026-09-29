@@ -142,7 +142,7 @@
 //     if (!item_arrow_left || !item_arrow_right) return;
 
 //     if (item_count <= 1) {
-//         // Only 0 or 1 item → hide both arrows
+//         // Only 0 or 1 item  hide both arrows
 //         lv_obj_add_flag(item_arrow_left, LV_OBJ_FLAG_HIDDEN);
 //         lv_obj_add_flag(item_arrow_right, LV_OBJ_FLAG_HIDDEN);
 //     } else {
@@ -418,7 +418,7 @@
 //         lv_label_set_text(item_auction_name_label, current_auction_name);
 //     }
     
-//     Serial.printf("📋 Auction details set: %s - Mode: %d\n", 
+//     Serial.printf(" Auction details set: %s - Mode: %d\n", 
 //                   current_auction_name, mode);
 // }
 
@@ -618,7 +618,7 @@
 //             lv_obj_set_style_border_width(item_card2, 2, 0);
 
 //         } else {
-//             // No next item → hide second card
+//             // No next item  hide second card
 //             lv_obj_add_flag(item_card2, LV_OBJ_FLAG_HIDDEN);
 //         }
 //     }
@@ -814,7 +814,7 @@
 //     const char* bid_text = lv_textarea_get_text(bid_textarea);
     
 //     if (strlen(bid_text) == 0) {
-//         lv_label_set_text(bid_title_label, "❌ Error");
+//         lv_label_set_text(bid_title_label, " Error");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //         lv_label_set_text(bid_min_label, "Please enter a bid amount");
 //         return;
@@ -822,7 +822,7 @@
     
 //     float bid_amount = atof(bid_text);
 //     if (bid_amount <= 0) {
-//         lv_label_set_text(bid_title_label, "❌ Error");
+//         lv_label_set_text(bid_title_label, " Error");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //         lv_label_set_text(bid_min_label, "Please enter a valid amount");
 //         return;
@@ -833,14 +833,14 @@
 //     const char* nfcUid = get_current_nfc_uid();
     
 //     if (!auction_id || strlen(auction_id) == 0) {
-//         lv_label_set_text(bid_title_label, "❌ Error");
+//         lv_label_set_text(bid_title_label, " Error");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //         lv_label_set_text(bid_min_label, "No auction selected");
 //         return;
 //     }
     
 //     if (!item_id || strlen(item_id) == 0) {
-//         lv_label_set_text(bid_title_label, "❌ Error");
+//         lv_label_set_text(bid_title_label, " Error");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //         lv_label_set_text(bid_min_label, "No item selected");
 //         return;
@@ -853,7 +853,7 @@
 //                     "Minimum bid is %s", 
 //                     current_item_data.price_formatted);
             
-//             lv_label_set_text(bid_title_label, "❌ Invalid Bid");
+//             lv_label_set_text(bid_title_label, " Invalid Bid");
 //             lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //             lv_label_set_text(bid_min_label, error_msg);
 //             return;
@@ -866,14 +866,14 @@
 //                     "Bid must be above %s", 
 //                     current_item_data.price_formatted);
             
-//             lv_label_set_text(bid_title_label, "❌ Invalid Bid");
+//             lv_label_set_text(bid_title_label, " Invalid Bid");
 //             lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //             lv_label_set_text(bid_min_label, error_msg);
 //             return;
 //         }
 //     }
     
-//     lv_label_set_text(bid_title_label, "⏳ Sending...");
+//     lv_label_set_text(bid_title_label, " Sending...");
 //     lv_obj_set_style_text_color(bid_title_label, COLOR_WARNING, 0);
 //     lv_label_set_text(bid_min_label, "Please wait");
 //     lv_timer_handler();
@@ -884,7 +884,7 @@
     
 //     // Just pass an empty string for NFC UID - no external variable needed
 //     //const char* nfcUid = "";
-//     Serial.printf("📤 Submitting bid:\n");
+//     Serial.printf(" Submitting bid:\n");
 //     Serial.printf("  Auction: %s\n", auction_id);
 //     Serial.printf("  Item: %s\n", item_id);
 //     Serial.printf("  NFC UID: %s\n", nfcUid);
@@ -900,7 +900,7 @@
 //     );
     
 //     if (!sent) {
-//         lv_label_set_text(bid_title_label, "❌ Failed");
+//         lv_label_set_text(bid_title_label, " Failed");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
 //         lv_label_set_text(bid_min_label, "Failed to send bid");
         
@@ -915,7 +915,7 @@
 //             lv_timer_del(t);
 //         }, 2000, nullptr);
 //     } else {
-//         lv_label_set_text(bid_title_label, "⏳ Waiting");
+//         lv_label_set_text(bid_title_label, " Waiting");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_WARNING, 0);
 //         lv_label_set_text(bid_min_label, "Waiting for response...");
         
@@ -1009,7 +1009,7 @@
 //     if (!bid_popup_active || !bid_popup) return;
     
 //     if (strcmp(status, "SUCCESS") == 0) {
-//         lv_label_set_text(bid_title_label, "✅ Success");
+//         lv_label_set_text(bid_title_label, " Success");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_SUCCESS, 0);
         
 //         if (strcmp(bidStatus, "WINNING") == 0) {
@@ -1022,7 +1022,7 @@
 //             lv_label_set_text(bid_min_label, "Bid accepted!");
 //         }
 //     } else {
-//         lv_label_set_text(bid_title_label, "❌ Failed");
+//         lv_label_set_text(bid_title_label, " Failed");
 //         lv_obj_set_style_text_color(bid_title_label, COLOR_DANGER, 0);
         
 //         const char* errorMsg = "Bid failed";
@@ -1285,7 +1285,7 @@ static void update_arrow_visibility() {
     if (!item_arrow_left || !item_arrow_right) return;
 
     if (item_count <= 1) {
-        // Only 0 or 1 item → hide both arrows
+        // Only 0 or 1 item  hide both arrows
         lv_obj_add_flag(item_arrow_left, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(item_arrow_right, LV_OBJ_FLAG_HIDDEN);
     } else {
@@ -1595,7 +1595,7 @@ void set_auction_details(const char* auction_name, AuctionMode mode) {
         lv_label_set_text(item_auction_name_label, current_auction_name);
     }
     
-    Serial.printf("📋 Auction details set: %s - Mode: %d\n", 
+    Serial.printf(" Auction details set: %s - Mode: %d\n", 
                   current_auction_name, mode);
 }
 
@@ -1823,7 +1823,7 @@ void update_item_display() {
             lv_obj_set_style_border_color(item_card2, COLOR_BORDER, 0);
             lv_obj_set_style_border_width(item_card2, 2, 0);
         } else {
-            // No next item → hide second card
+            // No next item  hide second card
             lv_obj_add_flag(item_card2, LV_OBJ_FLAG_HIDDEN);
         }
     }
@@ -1999,7 +1999,7 @@ static void show_bid_popup() {
     lv_obj_set_style_radius(bid_popup, 10, 0);
     lv_obj_set_style_pad_all(bid_popup, 10, 0);
     
-    // ✅ Add user name label at the top with circular scrolling
+    //  Add user name label at the top with circular scrolling
     bid_user_label = lv_label_create(bid_popup);
     lv_obj_set_width(bid_user_label, 190);
     lv_label_set_long_mode(bid_user_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
@@ -2029,7 +2029,7 @@ static void show_bid_popup() {
     lv_obj_set_style_text_font(bid_title_label, &lv_font_montserrat_14, 0);
     lv_obj_align(bid_title_label, LV_ALIGN_TOP_MID, 0, 22);
     
-    // ✅ Dedicated scrolling item name label
+    //  Dedicated scrolling item name label
     bid_item_label = lv_label_create(bid_popup);
     lv_obj_set_width(bid_item_label, 190);
     lv_label_set_long_mode(bid_item_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
@@ -2206,7 +2206,7 @@ static void bid_confirm_cb(lv_event_t* e) {
     char message_id[32];
     snprintf(message_id, sizeof(message_id), "BID_%d_%lu", ++bid_counter, millis() % 10000);
     
-    Serial.printf("📤 Submitting bid:\n");
+    Serial.printf(" Submitting bid:\n");
     Serial.printf("  Auction: %s\n", auction_id);
     Serial.printf("  Item: %s\n", item_id);
     Serial.printf("  NFC UID: %s\n", nfcUid);

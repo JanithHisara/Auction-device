@@ -22,7 +22,7 @@ bool Protocol::isMessageDuplicate(const char* messageId) {
     
     for (const auto& msg : _recentMessages) {
         if (msg.messageId == idStr) {
-            Serial.print("⚠️ Duplicate message ignored: ");
+            Serial.print(" Duplicate message ignored: ");
             Serial.println(messageId);
             return true;
         }
@@ -58,7 +58,7 @@ String Protocol::generateMessageId(const char* prefix) {
 
 bool Protocol::publish(JsonDocument& doc) {
     if (!_mqttClient.connected()) {
-        Serial.println("⚠️ MQTT not connected");
+        Serial.println(" MQTT not connected");
         return false;
     }
     
@@ -83,11 +83,11 @@ bool Protocol::publish(JsonDocument& doc) {
     size_t len = serializeJson(doc, buffer);
     
     if (len >= sizeof(buffer)) {
-        Serial.println("⚠️ Message too large for buffer");
+        Serial.println(" Message too large for buffer");
         return false;
     }
     
-    Serial.print("📤 Publishing: ");
+    Serial.print(" Publishing: ");
     Serial.println(buffer);
     
     return _mqttClient.publish(_reqTopic, buffer, false, 1);
@@ -154,7 +154,7 @@ void Protocol::onAction(const char* action, ActionHandler handler) {
     if (_handlerCount < MAX_HANDLERS) {
         _handlers[_handlerCount++] = {String(action), handler};
     } else {
-        Serial.println("⚠️ Maximum handlers reached");
+        Serial.println(" Maximum handlers reached");
     }
 }
 
@@ -162,13 +162,13 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     if (strcmp(topic, _resTopic) != 0 && strcmp(topic, "auction/broadcast") != 0) return;
     
     if (length > 8192) {
-        Serial.println("❌ Message too large (>8KB)");
+        Serial.println(" Message too large (>8KB)");
         return;
     }
     
     char* jsonBuffer = (char*)malloc(length + 1);
     if (!jsonBuffer) {
-        Serial.println("❌ Memory allocation failed");
+        Serial.println(" Memory allocation failed");
         return;
     }
     
@@ -180,7 +180,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     free(jsonBuffer);
     
     if (err) {
-        Serial.print("❌ JSON parse failed: ");
+        Serial.print(" JSON parse failed: ");
         Serial.println(err.c_str());
         return;
     }
@@ -192,13 +192,13 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
     
     const char* action = doc["Action"] | "";
     if (strlen(action) == 0) {
-        Serial.println("⚠️ JSON missing Action");
+        Serial.println(" JSON missing Action");
         return;
     }
     
     const char* status = doc["Status"] | "UNKNOWN";
     
-    Serial.printf("📥 Action: %s, Status: %s, MsgID: %s\n", 
+    Serial.printf(" Action: %s, Status: %s, MsgID: %s\n", 
                   action, status, messageId);
     
     // Clear previous data
@@ -226,7 +226,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
                 _auctions.push_back(a);
                 lastResponse.Auctions.push_back(a);
             }
-            Serial.printf("✅ Received %d auctions\n", _auctions.size());
+            Serial.printf(" Received %d auctions\n", _auctions.size());
             
             if (_auctionsHandler) {
                 _auctionsHandler(_auctions);
@@ -263,7 +263,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
             lastNFCAccessResponse.Access.Reason = _lastNFCAccess.Access.Reason;
         }
         
-        Serial.printf("📥 NFC Access - Granted: %s\n", 
+        Serial.printf(" NFC Access - Granted: %s\n", 
                       _lastNFCAccess.Access.Granted ? "YES" : "NO");
         
         if (_nfcHandler) {
@@ -307,7 +307,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
                 lastItemsResponse.Items.push_back(item);
             }
             
-            Serial.printf("✅ Received %d items for auction %s\n", 
+            Serial.printf(" Received %d items for auction %s\n", 
                           _items.size(), auctionId.c_str());
             
             if (_itemsHandler) {
@@ -344,7 +344,7 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
         _lastBidResult.Currency = lastBidResponse.Currency;
         _lastBidResult.Reason = lastBidResponse.Reason;
         
-        Serial.printf("📥 Bid Result - Status: %s, BidStatus: %s\n", 
+        Serial.printf(" Bid Result - Status: %s, BidStatus: %s\n", 
                       status, _lastBidResult.Bid_Status.c_str());
         
         if (_bidHandler) {
@@ -360,4 +360,5 @@ void Protocol::handleMessage(char* topic, byte* payload, unsigned int length) {
         }
     }
 }
+
 

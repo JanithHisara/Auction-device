@@ -19,13 +19,13 @@ bool SD_Manager::begin()
     SPI.begin(_sclk, _miso, _mosi);
 
     if (!SD.begin(_cs)) {
-        Serial.println("❌ SD Mount Failed");
+        Serial.println(" SD Mount Failed");
         return false;
     }
 
     _sdReady = true;
 
-    Serial.println("✅ SD Mounted");
+    Serial.println(" SD Mounted");
 
     uint64_t size = SD.cardSize() / (1024 * 1024);
     Serial.print("Size: ");
@@ -42,7 +42,7 @@ void SD_Manager::writeTestFile()
     File file = SD.open("/test.txt", FILE_WRITE);
 
     if (!file) {
-        Serial.println("❌ Write open failed");
+        Serial.println(" Write open failed");
         return;
     }
 
@@ -50,7 +50,7 @@ void SD_Manager::writeTestFile()
     file.println("Auction terminal storage test");
 
     file.close();
-    Serial.println("✅ File written");
+    Serial.println(" File written");
 }
 
 void SD_Manager::readTestFile()
@@ -60,7 +60,7 @@ void SD_Manager::readTestFile()
     File file = SD.open("/test.txt");
 
     if (!file) {
-        Serial.println("❌ Read open failed");
+        Serial.println(" Read open failed");
         return;
     }
 
@@ -111,7 +111,7 @@ bool SD_Manager::saveBidRecord(const char* auctionId,
     File file = SD.open(filename, FILE_APPEND);
 
     if (!file) {
-        Serial.println("❌ Failed to open " + String(filename));
+        Serial.println(" Failed to open " + String(filename));
         return false;
     }
 
@@ -130,7 +130,7 @@ bool SD_Manager::saveBidRecord(const char* auctionId,
 
     file.close();
 
-    Serial.println("✅ Bid saved to " + String(filename));
+    Serial.println(" Bid saved to " + String(filename));
     return true;
 }
 

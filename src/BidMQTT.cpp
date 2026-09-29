@@ -34,9 +34,9 @@ bool BidMQTT::submitBid(const char* auctionName, const char* itemId, const char*
 
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
-    buffer[n] = '\0';  // ✅ CRITICAL: Null-terminate for MQTT publish
+    buffer[n] = '\0';  //  CRITICAL: Null-terminate for MQTT publish
 
-    Serial.print("📤 Sending Bid: ");
+    Serial.print(" Sending Bid: ");
     Serial.println(buffer);
 
     return _mqttClient.publish(_reqTopic, buffer, false, 1);  // Removed length parameter
@@ -46,7 +46,7 @@ void BidMQTT::onAction(const char* action, BidHandler handler) {
     if (handlerCount < MAX_HANDLERS) {
         handlers[handlerCount++] = {action, handler};
     } else {
-        Serial.println("⚠️ Max bid handlers reached");
+        Serial.println(" Max bid handlers reached");
     }
 }
 
@@ -55,7 +55,7 @@ void BidMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
 
     char* jsonBuffer = (char*)malloc(length + 1);
     if (!jsonBuffer) {
-        Serial.println("❌ Memory allocation failed");
+        Serial.println(" Memory allocation failed");
         return;
     }
 
@@ -67,7 +67,7 @@ void BidMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     free(jsonBuffer);
 
     if (err) {
-        Serial.print("❌ JSON parse failed: "); 
+        Serial.print(" JSON parse failed: "); 
         Serial.println(err.c_str());
         return;
     }
@@ -88,7 +88,7 @@ void BidMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     const char* currency = doc["Currency"] | "";
     int reason = doc["Reason"] | 0;
 
-    Serial.print("📥 Bid Action: "); Serial.println(action);
+    Serial.print(" Bid Action: "); Serial.println(action);
     Serial.print("Message_ID: "); Serial.println(messageId);
     Serial.print("Status: "); Serial.println(status);
 

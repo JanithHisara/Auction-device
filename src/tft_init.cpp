@@ -235,7 +235,7 @@ void TFT_init::drawImage(uint16_t x, uint16_t y,
 //     int spacing     = 10;
 //     int top_margin  = 30; // space below top bar
 
-//     // 🔴 CRITICAL: match original centering behavior
+//     //  CRITICAL: match original centering behavior
 //     lv_obj_set_style_pad_all(content_area, 0, 0);
 //     lv_obj_clear_flag(content_area, LV_OBJ_FLAG_SCROLLABLE);
 //     lv_obj_set_scrollbar_mode(content_area, LV_SCROLLBAR_MODE_OFF);
@@ -280,7 +280,7 @@ void TFT_init::drawImage(uint16_t x, uint16_t y,
 //             lv_label_set_text(label_desc[i], auction_list[idx].description);
 //             lv_label_set_text(label_status[i], auction_list[idx].status);
 
-//             // 🔴 Border only for Live Auction
+//             //  Border only for Live Auction
 //             if(strcmp(auction_list[idx].name, "Live Auction") == 0){
 //                 lv_obj_set_style_border_color(card[i], lv_color_hex(0xFF0000), 0);
 //             } else {

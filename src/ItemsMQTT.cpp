@@ -27,7 +27,7 @@ void ItemsMQTT::loop() {
 //     char buffer[256];
 //     size_t len = serializeJson(doc, buffer);
 
-//     Serial.print("📤 Sending GET_ITEMS request: ");
+//     Serial.print(" Sending GET_ITEMS request: ");
 //     Serial.println(buffer);
 
 //     return _mqttClient.publish(_reqTopic, buffer, len);
@@ -35,7 +35,7 @@ void ItemsMQTT::loop() {
 
 bool ItemsMQTT::publishRequest(const char* auctionName, const char* messageId, const char* nfcUid) {
     if (!_mqttClient.connected()) {
-        Serial.println("⚠️ MQTT not connected, cannot publish GET_ITEMS");
+        Serial.println(" MQTT not connected, cannot publish GET_ITEMS");
         return false;
     }
 
@@ -58,9 +58,9 @@ bool ItemsMQTT::publishRequest(const char* auctionName, const char* messageId, c
 
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
-    buffer[n] = '\0';  // ✅ CRITICAL: Null-terminate for MQTT publish
+    buffer[n] = '\0';  //  CRITICAL: Null-terminate for MQTT publish
 
-    Serial.print("📤 Sending GET_ITEMS request (");
+    Serial.print(" Sending GET_ITEMS request (");
     Serial.print(n);
     Serial.print(" bytes): ");
     Serial.println(buffer);
@@ -69,7 +69,7 @@ bool ItemsMQTT::publishRequest(const char* auctionName, const char* messageId, c
     bool result = _mqttClient.publish(_reqTopic, buffer, false, 1);
     
     if (!result) {
-        Serial.println("❌ Failed to publish GET_ITEMS request");
+        Serial.println(" Failed to publish GET_ITEMS request");
         Serial.print("MQTT state: ");
         Serial.println(_mqttClient.lastError());
     }
@@ -81,7 +81,7 @@ void ItemsMQTT::onAction(const char* action, ItemsHandler handler) {
     if (handlerCount < 20) {
         handlers[handlerCount++] = {action, handler};
     } else {
-        Serial.println("⚠️ Max items handlers reached");
+        Serial.println(" Max items handlers reached");
     }
 }
 
@@ -90,7 +90,7 @@ void ItemsMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
 
     char* jsonBuffer = (char*)malloc(length + 1);
     if (!jsonBuffer) {
-        Serial.println("❌ Memory allocation failed");
+        Serial.println(" Memory allocation failed");
         return;
     }
 
@@ -102,7 +102,7 @@ void ItemsMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     free(jsonBuffer);
 
     if (err) {
-        Serial.print("❌ JSON parse failed: "); 
+        Serial.print(" JSON parse failed: "); 
         Serial.println(err.c_str());
         return;
     }
@@ -116,7 +116,7 @@ void ItemsMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     const char* auctionMode = doc["Auction_Mode"] | "";
     const char* auctionStatus = doc["Auction_Status"] | "";
 
-    Serial.print("🔹 GET_ITEMS Response - Auction_ID: "); Serial.println(auctionName);
+    Serial.print(" GET_ITEMS Response - Auction_ID: "); Serial.println(auctionName);
     Serial.print("Status: "); Serial.println(status);
 
     if (strcmp(status, "SUCCESS") == 0) {

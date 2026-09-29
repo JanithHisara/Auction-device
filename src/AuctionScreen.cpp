@@ -454,23 +454,23 @@
 // // ================== PRINT CURRENT AUCTION DETAILS AND RETURN ID
 // ================== const char* print_current_auction_details() {
 //     if(auction_count == 0) {
-//         Serial.println("\n❌ No auctions available");
+//         Serial.println("\n No auctions available");
 //         return nullptr;
 //     }
 
 //     if(current_index < 0 || current_index >= auction_count) {
-//         Serial.println("\n❌ Invalid auction index");
+//         Serial.println("\n Invalid auction index");
 //         return nullptr;
 //     }
 
 //     AuctionDisplay& current = auction_list[current_index];
 
-//     Serial.println("\n╔════════════════════════════════════╗");
-//     Serial.println("║     CURRENT AUCTION DETAILS       ║");
-//     Serial.println("╠════════════════════════════════════╣");
+//     Serial.println("\n");
+//     Serial.println("     CURRENT AUCTION DETAILS       ");
+//     Serial.println("");
 
 //     // Auction Name
-//     Serial.print("║ Name      : ");
+//     Serial.print(" Name      : ");
 //     if(current.name) {
 //         Serial.print(current.name);
 //         int len = strlen(current.name);
@@ -478,10 +478,10 @@
 //     } else {
 //         Serial.print("Unknown               ");
 //     }
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
 //     // Auction ID - highlight this one
-//     Serial.print("║ ID        : ");
+//     Serial.print(" ID        : ");
 //     if(current.id) {
 //         Serial.print(current.id);
 //         int len = strlen(current.id);
@@ -489,10 +489,10 @@
 //     } else {
 //         Serial.print("Unknown               ");
 //     }
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
 //     // Date/Time
-//     Serial.print("║ Date/Time : ");
+//     Serial.print(" Date/Time : ");
 //     if(current.start_datetime) {
 //         Serial.print(current.start_datetime);
 //         int len = strlen(current.start_datetime);
@@ -500,10 +500,10 @@
 //     } else {
 //         Serial.print("Unknown               ");
 //     }
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
 //     // Mode
-//     Serial.print("║ Mode      : ");
+//     Serial.print(" Mode      : ");
 //     if(current.mode) {
 //         Serial.print(current.mode);
 //         int len = strlen(current.mode);
@@ -511,10 +511,10 @@
 //     } else {
 //         Serial.print("Unknown               ");
 //     }
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
 //     // Status
-//     Serial.print("║ Status    : ");
+//     Serial.print(" Status    : ");
 //     if(current.status) {
 //         Serial.print(current.status);
 //         int len = strlen(current.status);
@@ -522,28 +522,28 @@
 //     } else {
 //         Serial.print("Unknown               ");
 //     }
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
 //     // Items Count
-//     Serial.print("║ Items     : ");
+//     Serial.print(" Items     : ");
 //     Serial.print(current.items_count);
 //     char items_buf[10];
 //     snprintf(items_buf, sizeof(items_buf), "%d", current.items_count);
 //     int len = strlen(items_buf);
 //     for(int i = len; i < 20; i++) Serial.print(" ");
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
 //     // Registered Users
-//     Serial.print("║ Registered: ");
+//     Serial.print(" Registered: ");
 //     Serial.print(current.registered_count);
 //     char reg_buf[10];
 //     snprintf(reg_buf, sizeof(reg_buf), "%d", current.registered_count);
 //     len = strlen(reg_buf);
 //     for(int i = len; i < 20; i++) Serial.print(" ");
-//     Serial.println(" ║");
+//     Serial.println(" ");
 
-//     Serial.println("╚════════════════════════════════════╝");
-//     Serial.print("📊 Auction ");
+//     Serial.println("");
+//     Serial.print(" Auction ");
 //     Serial.print(current_index + 1);
 //     Serial.print(" of ");
 //     Serial.println(auction_count);
@@ -861,7 +861,7 @@ void clear_auction_data() {
   lv_obj_add_flag(arrow_up, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(arrow_down, LV_OBJ_FLAG_HIDDEN);
 
-  Serial.println("🧹 Auction data cleared from RAM");
+  Serial.println(" Auction data cleared from RAM");
 }
 
 // ================== UPDATE ARROW VISIBILITY ==================
@@ -1068,7 +1068,7 @@ void update_auctions_from_mqtt(Auction *mqtt_auctions, int count) {
     auction_list[i].password = password_buffers[i];
   }
 
-  Serial.printf("✅ Loaded %d auctions into RAM\n", auction_count);
+  Serial.printf(" Loaded %d auctions into RAM\n", auction_count);
 }
 
 // ================== NAVIGATION ==================
@@ -1124,62 +1124,62 @@ void show_custom_loading(const char *message) {
 // ==================
 const char *print_current_auction_details() {
   if (auction_count == 0) {
-    Serial.println("\n❌ No auctions available");
+    Serial.println("\n No auctions available");
     return nullptr;
   }
 
   if (current_index < 0 || current_index >= auction_count) {
-    Serial.println("\n❌ Invalid auction index");
+    Serial.println("\n Invalid auction index");
     return nullptr;
   }
 
-  Serial.println("\n╔════════════════════════════════════╗");
-  Serial.println("║     CURRENT AUCTION DETAILS       ║");
-  Serial.println("╠════════════════════════════════════╣");
+  Serial.println("\n");
+  Serial.println("     CURRENT AUCTION DETAILS       ");
+  Serial.println("");
 
-  Serial.print("║ Name      : ");
+  Serial.print(" Name      : ");
   Serial.print(name_buffers[current_index]);
   int len = strlen(name_buffers[current_index]);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ ID        : ");
+  Serial.print(" ID        : ");
   Serial.print(id_buffers[current_index]);
   len = strlen(id_buffers[current_index]);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ Start     : ");
+  Serial.print(" Start     : ");
   Serial.print(start_datetime_buffers[current_index]);
   len = strlen(start_datetime_buffers[current_index]);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ End       : ");
+  Serial.print(" End       : ");
   Serial.print(end_datetime_buffers[current_index]);
   len = strlen(end_datetime_buffers[current_index]);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ Mode      : ");
+  Serial.print(" Mode      : ");
   Serial.print(mode_buffers[current_index]);
   len = strlen(mode_buffers[current_index]);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ Status    : ");
+  Serial.print(" Status    : ");
   Serial.print(status_buffers[current_index]);
   len = strlen(status_buffers[current_index]);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ Items     : ");
+  Serial.print(" Items     : ");
   Serial.print(auction_list[current_index].items_count);
   char items_buf[10];
   snprintf(items_buf, sizeof(items_buf), "%d",
@@ -1187,9 +1187,9 @@ const char *print_current_auction_details() {
   len = strlen(items_buf);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.print("║ Registered: ");
+  Serial.print(" Registered: ");
   Serial.print(auction_list[current_index].registered_count);
   char reg_buf[10];
   snprintf(reg_buf, sizeof(reg_buf), "%d",
@@ -1197,10 +1197,10 @@ const char *print_current_auction_details() {
   len = strlen(reg_buf);
   for (int i = len; i < 20; i++)
     Serial.print(" ");
-  Serial.println(" ║");
+  Serial.println(" ");
 
-  Serial.println("╚════════════════════════════════════╝");
-  Serial.print("📊 Auction ");
+  Serial.println("");
+  Serial.print(" Auction ");
   Serial.print(current_index + 1);
   Serial.print(" of ");
   Serial.println(auction_count);
@@ -1250,3 +1250,4 @@ void show_auction_screen() {
       lv_obj_clear_flag(main_card, LV_OBJ_FLAG_HIDDEN);
   }
 }
+

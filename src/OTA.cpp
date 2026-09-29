@@ -84,21 +84,22 @@
 
 //   Serial.println("Checking for OTA updates...\n");
 
-//   // Step 1 → Update Firmware
+//   // Step 1  Update Firmware
 //   if (!updateFirmware()) {
-//     Serial.println("❌ Firmware update FAILED!");
+//     Serial.println(" Firmware update FAILED!");
 //     return;
 //   }
 
-//   // Step 2 → Update LittleFS
+//   // Step 2  Update LittleFS
 //   if (!updateLittleFS()) {
-//     Serial.println("❌ LittleFS update FAILED!");
+//     Serial.println(" LittleFS update FAILED!");
 //     return;
 //   }
 
-//   Serial.println("\n✅ ALL OTA Updates Completed Successfully!");
+//   Serial.println("\n ALL OTA Updates Completed Successfully!");
 //   Serial.println("Rebooting in 2 seconds...");
 //   delay(2000);
 //   ESP.restart();
 // }
+
 

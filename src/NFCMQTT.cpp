@@ -17,7 +17,7 @@ void NFCMQTT::loop() {
 
 bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const char* messageId) {
     if (!_mqttClient.connected()) {
-        Serial.println("⚠️ MQTT not connected, cannot publish NFC request");
+        Serial.println(" MQTT not connected, cannot publish NFC request");
         return false;
     }
 
@@ -44,9 +44,9 @@ bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const cha
 
     char buffer[256];
     size_t n = serializeJson(doc, buffer);
-    buffer[n] = '\0';  // ✅ CRITICAL: Null-terminate for MQTT publish
+    buffer[n] = '\0';  //  CRITICAL: Null-terminate for MQTT publish
 
-    Serial.print("📤 Sending NFC request for UID: ");
+    Serial.print(" Sending NFC request for UID: ");
     Serial.print(nfcUid);
     Serial.print(" (");
     Serial.print(n);
@@ -54,10 +54,10 @@ bool NFCMQTT::checkAccess(const char* nfcUid, const char* auctionName, const cha
     Serial.println(buffer);
 
     // Use null-terminated string version
-    bool result = _mqttClient.publish(_reqTopic, buffer, false, 1);
+    bool result = _mqttClient.publish(_reqTopic, buffer, false, 0);
     
     if (!result) {
-        Serial.println("❌ Failed to publish NFC request");
+        Serial.println(" Failed to publish NFC request");
         _pendingUid = ""; // Clear on failure
     }
     
@@ -70,7 +70,7 @@ void NFCMQTT::onAction(const char* action, NFCHandler handler) {
         handlers[handlerCount].handler = handler;
         handlerCount++;
     } else {
-        Serial.println("⚠️ Max NFC handlers reached");
+        Serial.println(" Max NFC handlers reached");
     }
 }
 
@@ -79,7 +79,7 @@ void NFCMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
 
     char* jsonBuffer = (char*)malloc(length + 1);
     if (!jsonBuffer) {
-        Serial.println("❌ Memory allocation failed");
+        Serial.println(" Memory allocation failed");
         return;
     }
 
@@ -91,7 +91,7 @@ void NFCMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
     free(jsonBuffer);
 
     if (err) {
-        Serial.print("❌ JSON parse failed: "); Serial.println(err.c_str());
+        Serial.print(" JSON parse failed: "); Serial.println(err.c_str());
         return;
     }
 
@@ -119,7 +119,7 @@ void NFCMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
 
     // CRITICAL: Only process if UID matches
     if (_pendingUid.length() > 0 && _pendingUid != String(nfcUid)) {
-        Serial.println("⚠️ UID mismatch - ignoring response (waiting for different card)");
+        Serial.println(" UID mismatch - ignoring response (waiting for different card)");
         return;  // Don't process responses for wrong cards
     }
 
@@ -162,3 +162,4 @@ void NFCMQTT::handleMessage(char* topic, byte* payload, unsigned int length) {
         navigateToItemCallback(userName, userRole, userId);
     }
 }
+
