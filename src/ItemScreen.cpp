@@ -1326,7 +1326,10 @@ void init_item_screen(lv_obj_t* parent) {
     
     // Loading label
     item_loading_label = lv_label_create(parent);
-    lv_label_set_text(item_loading_label, "Loading Items1...");
+    lv_obj_set_width(item_loading_label, 280);
+    lv_label_set_long_mode(item_loading_label, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_align(item_loading_label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_label_set_text(item_loading_label, "Loading Items...");
     lv_obj_center(item_loading_label);
     lv_obj_set_style_text_color(item_loading_label, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(item_loading_label, &lv_font_montserrat_14, 0);
