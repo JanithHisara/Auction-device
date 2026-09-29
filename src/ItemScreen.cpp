@@ -1686,7 +1686,20 @@ void load_items_from_mqtt(const JsonArray& items_array, const char* auction_mode
         if (item_loading_label && screen_visible) {
             String stat = String(auction_status != nullptr ? auction_status : "");
             stat.toLowerCase();
-            if (stat == "ended" || stat == "completed" || stat == "finished") { lv_label_set_text(item_loading_label, "Auction is finished"); } else if (!stat.equalsIgnoreCase("live") && !stat.equalsIgnoreCase("open")) { lv_label_set_text(item_loading_label, "Auction is not live"); } else { lv_label_set_text(item_loading_label, "Items are not placed yet"); }
+            if (stat == "ended" || stat == "completed" || stat == "finished") { 
+                lv_label_set_text(item_loading_label, "Auction is finished"); 
+            } else if (!stat.equalsIgnoreCase("live") && !stat.equalsIgnoreCase("open")) { 
+                lv_label_set_text(item_loading_label, "Auction is not live"); 
+            } else { 
+                const char* userName = get_current_user_name();
+                if (userName && strlen(userName) > 0) {
+                    char loading_msg[128];
+                    snprintf(loading_msg, sizeof(loading_msg), "%s, auction is live but items are not placed yet please wait", userName);
+                    lv_label_set_text(item_loading_label, loading_msg);
+                } else {
+                    lv_label_set_text(item_loading_label, "Auction is live but items are not placed yet please wait"); 
+                }
+            }
             
             // Make sure the label is visible!
             lv_obj_clear_flag(item_loading_label, LV_OBJ_FLAG_HIDDEN);
