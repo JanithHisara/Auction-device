@@ -1,4 +1,4 @@
-#include <Wire.h>
+﻿#include <Wire.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <logo.h>
@@ -334,7 +334,7 @@ void readNFC() {
                 Serial.println(" NFC card does not match the registered auction participant!");
                 show_custom_loading_timeout("Unauthorized Card!", 2000);
                 nfcState = NFC_IDLE;
-                currentUI = UI_ITEMS;
+                currentUI = UI_ITEMS; item_index = 0; current_index = 0;
                 return;
             }
             Serial.println("NFC verified for bid");
@@ -348,7 +348,7 @@ void readNFC() {
             // NOW submit bid
             confirm_bid();
             nfcState = NFC_IDLE;
-            currentUI = UI_ITEMS;
+            currentUI = UI_ITEMS; item_index = 0; current_index = 0;
             return;
         }
         // NORMAL AUCTION AUTH FLOW - THIS IS WHERE NFC PUBLISH HAPPENS
@@ -527,25 +527,6 @@ void setupMQTTCallbacks() {
                 if (currentUI == UI_AUCTION) {
                     hide_refresh_popup();
                     refresh_display();
-                } else if (currentUI == UI_LOADING_ITEMS && selectedAuctionId.length() > 0) {
-                    for (int i = 0; i < auction_count; i++) {
-                        if (selectedAuctionId == String(auction_list[i].id)) {
-                            selectedAuctionStatus = String(auction_list[i].status);
-                            if (selectedAuctionStatus.equalsIgnoreCase("LIVE")) {
-                                Serial.println("Auction went LIVE! Loading items...");
-                                hide_auction_screen();
-                                show_item_screen();
-                                String msgId = "GET_ITEMS_" + String(millis());
-                                if (items.publishRequest(selectedAuctionId.c_str(), msgId.c_str())) {
-                                    Serial.println("GET_ITEMS request sent for auction: " + selectedAuctionId);
-                                } else {
-                                    show_custom_loading_timeout("Failed to load items", 2000);
-                                    currentUI = UI_AUCTION;
-                                }
-                            }
-                            break;
-                        }
-                    }
                 }
             }
         } else {
@@ -580,13 +561,11 @@ void setupMQTTCallbacks() {
                 
                 lv_timer_t* t = lv_timer_create([](lv_timer_t* timer){
                     if (selectedAuctionId.length() > 0) {
-                        if (selectedAuctionStatus != "LIVE") {
-                            show_custom_loading("Auction not live");
-                        } else {
                         Serial.println("Access granted - Loading items for auction: " + selectedAuctionId);
                         
                         hide_auction_screen();
                         show_item_screen();   // shows loading label
+                        currentUI = UI_ITEMS; item_index = 0; current_index = 0;
                         
                         String msgId = "GET_ITEMS_" + String(millis());
                         if (items.publishRequest(selectedAuctionId.c_str(), msgId.c_str())) {
@@ -596,7 +575,6 @@ void setupMQTTCallbacks() {
                             show_custom_loading_timeout("\uF071 Failed to load items", 2000);
                             currentUI = UI_AUCTION;
                         }
-                    }
                         }
                     lv_timer_del(timer);
                 }, 1500, nullptr);
@@ -698,7 +676,7 @@ void setupMQTTCallbacks() {
             }
             item_index = current_index;
         }
-        currentUI = UI_ITEMS;
+        currentUI = UI_ITEMS; item_index = 0; current_index = 0;
 
         Serial.println("Items loaded successfully");
     });
@@ -1175,16 +1153,6 @@ void setup() {
 
 // ------------------ LOOP ------------------
 void loop() {
-    
-    // Auto-poll GET_AUCTION every 5 seconds if waiting on 'Auction not live' screen
-    static unsigned long last_live_poll = 0;
-    if (currentUI == UI_LOADING_ITEMS && !selectedAuctionStatus.equalsIgnoreCase("LIVE")) {
-        if (millis() - last_live_poll > 5000) {
-            last_live_poll = millis();
-            String msgId = "SYNC_" + String(millis());
-            auction.publishRequest("GET_AUCTION", msgId.c_str());
-        }
-    }
 
     lv_timer_handler();
     if (refresh_popup_box != nullptr && (millis() - refresh_popup_time > 1500)) {
@@ -1696,6 +1664,11 @@ void verify_and_proceed() {
         update_pin_display();
     }
 }
+
+
+
+
+
 
 
 

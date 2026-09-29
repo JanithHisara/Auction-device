@@ -1,4 +1,4 @@
-// #include "ItemScreen.h"
+﻿// #include "ItemScreen.h"
 // #include "BidMQTT.h"
 // #include "NFCMQTT.h"
 // #include <cstring>
@@ -1686,11 +1686,7 @@ void load_items_from_mqtt(const JsonArray& items_array, const char* auction_mode
         if (item_loading_label && screen_visible) {
             String stat = String(auction_status != nullptr ? auction_status : "");
             stat.toLowerCase();
-            if (stat == "ended" || stat == "completed" || stat == "finished") {
-                lv_label_set_text(item_loading_label, "Auction is finished");
-            } else {
-                lv_label_set_text(item_loading_label, "Items are not placed yet");
-            }
+            if (stat == "ended" || stat == "completed" || stat == "finished") { lv_label_set_text(item_loading_label, "Auction is finished"); } else if (!stat.equalsIgnoreCase("live") && !stat.equalsIgnoreCase("open")) { lv_label_set_text(item_loading_label, "Auction is not live"); } else { lv_label_set_text(item_loading_label, "Items are not placed yet"); }
             
             // Make sure the label is visible!
             lv_obj_clear_flag(item_loading_label, LV_OBJ_FLAG_HIDDEN);
@@ -2379,3 +2375,5 @@ const char* get_nfc_user_id() {
 const char* get_nfc_user_role() {
     return nfc_user_role;
 }
+
+
