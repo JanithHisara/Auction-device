@@ -986,7 +986,7 @@
 //     lv_obj_set_style_bg_color(bid_confirm_btn, COLOR_SUCCESS, 0);
     
 //     lv_obj_t* confirm_label = lv_label_create(bid_confirm_btn);
-//     lv_label_set_text(confirm_label, "Bid");
+//     lv_label_set_text(confirm_label, "Yes");
 //     lv_obj_center(confirm_label);
     
 //     bid_cancel_btn = lv_btn_create(bid_popup);
@@ -995,7 +995,7 @@
 //     lv_obj_set_style_bg_color(bid_cancel_btn, COLOR_DANGER, 0);
     
 //     lv_obj_t* cancel_label = lv_label_create(bid_cancel_btn);
-//     lv_label_set_text(cancel_label, "Cancel");
+//     lv_label_set_text(cancel_label, "No");
 //     lv_obj_center(cancel_label);
 
     
@@ -2100,7 +2100,7 @@ static void show_bid_popup() {
     lv_obj_set_style_bg_color(bid_confirm_btn, COLOR_SUCCESS, 0);
     
     lv_obj_t* confirm_label = lv_label_create(bid_confirm_btn);
-    lv_label_set_text(confirm_label, "Bid");
+    lv_label_set_text(confirm_label, "Yes");
     lv_obj_set_style_text_color(confirm_label, lv_color_white(), 0);
     lv_obj_center(confirm_label);
     
@@ -2110,7 +2110,7 @@ static void show_bid_popup() {
     lv_obj_set_style_bg_color(bid_cancel_btn, COLOR_DANGER, 0);
     
     lv_obj_t* cancel_label = lv_label_create(bid_cancel_btn);
-    lv_label_set_text(cancel_label, "Cancel");
+    lv_label_set_text(cancel_label, "No");
     lv_obj_set_style_text_color(cancel_label, lv_color_white(), 0);
     lv_obj_center(cancel_label);
 
@@ -2403,6 +2403,7 @@ const char* get_nfc_user_id() {
 const char* get_nfc_user_role() {
     return nfc_user_role;
 }
+
 
 
 
