@@ -527,6 +527,25 @@ void setupMQTTCallbacks() {
                 if (currentUI == UI_AUCTION) {
                     hide_refresh_popup();
                     refresh_display();
+                } else if (currentUI == UI_LOADING_ITEMS && selectedAuctionId.length() > 0) {
+                    for (int i = 0; i < auction_count; i++) {
+                        if (selectedAuctionId == String(auction_list[i].id)) {
+                            selectedAuctionStatus = String(auction_list[i].status);
+                            if (selectedAuctionStatus.equalsIgnoreCase("LIVE")) {
+                                Serial.println("Auction went LIVE! Loading items...");
+                                hide_auction_screen();
+                                show_item_screen();
+                                String msgId = "GET_ITEMS_" + String(millis());
+                                if (items.publishRequest(selectedAuctionId.c_str(), msgId.c_str())) {
+                                    Serial.println("GET_ITEMS request sent for auction: " + selectedAuctionId);
+                                } else {
+                                    show_custom_loading_timeout("Failed to load items", 2000);
+                                    currentUI = UI_AUCTION;
+                                }
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         } else {
@@ -1667,6 +1686,8 @@ void verify_and_proceed() {
         update_pin_display();
     }
 }
+
+
 
 
 
