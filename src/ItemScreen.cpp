@@ -1326,7 +1326,7 @@ void init_item_screen(lv_obj_t* parent) {
     
     // Loading label
     item_loading_label = lv_label_create(parent);
-    lv_obj_set_width(item_loading_label, 280);
+    lv_obj_set_width(item_loading_label, 220);
     lv_label_set_long_mode(item_loading_label, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(item_loading_label, LV_TEXT_ALIGN_CENTER, 0);
     lv_label_set_text(item_loading_label, "Loading Items...");
@@ -2391,5 +2391,6 @@ const char* get_nfc_user_id() {
 const char* get_nfc_user_role() {
     return nfc_user_role;
 }
+
 
 
