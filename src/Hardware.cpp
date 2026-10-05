@@ -157,13 +157,7 @@ void BatteryManager::setVoltageRange(float minV, float maxV) {
 }
 
 void BatteryManager::begin() {
-    lockI2C();
-    Wire.beginTransmission(_addr);
-    Wire.write(0x06); // quick start
-    Wire.write(0x40);
-    Wire.write(0x00);
-    Wire.endTransmission();
-    unlockI2C();
+    // Removed Quick Start to prevent incorrect SOC dropping under heavy boot load
 }
 
 float BatteryManager::readVoltage() {

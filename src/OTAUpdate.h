@@ -11,7 +11,7 @@ extern void hide_custom_loading();
 
 // Define the current firmware version of the device
 // CHANGE THIS TO 1.1 BEFORE COMPILING THE NEW FIRMWARE
-#define CURRENT_FIRMWARE_VERSION 3.8
+#define CURRENT_FIRMWARE_VERSION 3.9
 
 // URL to the version.json file on GitHub
 // Example JSON file contents: {"version": 1.1, "url": "https://raw.githubusercontent.com/JanithHisara/Auction-update-repo/main/firmware.bin"}
