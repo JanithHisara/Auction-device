@@ -36,48 +36,6 @@ char scanKeypadQueue() {
 void show_warning_timeout(const char* message, uint32_t timeout_ms);
 extern bool lowBatteryWarningShown;
 
-void processI2CQueue() {
-    I2CEvent ev;
-    while(xQueueReceive(i2cEventQueue, &ev, 0)) {
-        if (ev.type == EVENT_BATTERY_UPDATE) {
-            set_battery_percent(ev.data.battery.percentage);
-            
-            if (ev.data.battery.percentage <= 5 && ev.data.battery.voltage > 1.0) {
-                Serial.println("Battery <= 5%! Shutting down...");
-                show_custom_loading("Power Low!\nShutting down...");
-                lv_timer_handler();
-                
-                ledcSetup(0, 2000, 8);
-                ledcAttachPin(buzzer, 0);
-                ledcWriteTone(0, 1500);
-                delay(60);
-                ledcWriteTone(0, 800);
-                delay(100);
-                ledcWriteTone(0, 0);
-                ledcDetachPin(buzzer);
-                pinMode(buzzer, INPUT); 
-                
-                delay(2000); 
-                digitalWrite(Latch_ON, LOW);
-                while(true) delay(100);
-            }
-
-            if (ev.data.battery.percentage < 15 && ev.data.battery.percentage > 5) {
-                set_battery_color(lv_color_hex(0xFF0000));
-            } else if (ev.data.battery.percentage >= 15) {
-                set_battery_color(lv_color_white());
-            }
-        } else if (ev.type == EVENT_KEYPAD_PRESS) {
-            if (queuedKey == '\0') { // Don't overwrite if main loop is slow
-                queuedKey = ev.data.keyPressed;
-            }
-        } else if (ev.type == EVENT_NFC_SCANNED) {
-            queuedNfcUidLength = ev.data.nfc.uidLength;
-            memcpy(queuedNfcUid, ev.data.nfc.uid, queuedNfcUidLength);
-            queuedNfcAvailable = true;
-        }
-    }
-}
 #include <vector>
 #include <Secret.h>
 
@@ -1042,6 +1000,49 @@ void powerMonitorTask(void * parameter) {
             }
         }
         delay(50); // Yield to watchdogs
+    }
+}
+
+void processI2CQueue() {
+    I2CEvent ev;
+    while(xQueueReceive(i2cEventQueue, &ev, 0)) {
+        if (ev.type == EVENT_BATTERY_UPDATE) {
+            set_battery_percent(ev.data.battery.percentage);
+            
+            if (ev.data.battery.percentage <= 5 && ev.data.battery.voltage > 1.0) {
+                Serial.println("Battery <= 5%! Shutting down...");
+                show_custom_loading("Power Low!\nShutting down...");
+                lv_timer_handler();
+                
+                ledcSetup(0, 2000, 8);
+                ledcAttachPin(buzzer, 0);
+                ledcWriteTone(0, 1500);
+                delay(60);
+                ledcWriteTone(0, 800);
+                delay(100);
+                ledcWriteTone(0, 0);
+                ledcDetachPin(buzzer);
+                pinMode(buzzer, INPUT); 
+                
+                delay(2000); 
+                digitalWrite(Latch_ON, LOW);
+                esp_deep_sleep_start();
+            }
+
+            if (ev.data.battery.percentage < 15 && ev.data.battery.percentage > 5) {
+                set_battery_color(lv_color_hex(0xFF0000));
+            } else if (ev.data.battery.percentage >= 15) {
+                set_battery_color(lv_color_white());
+            }
+        } else if (ev.type == EVENT_KEYPAD_PRESS) {
+            if (queuedKey == '\0') { // Don't overwrite if main loop is slow
+                queuedKey = ev.data.keyPressed;
+            }
+        } else if (ev.type == EVENT_NFC_SCANNED) {
+            queuedNfcUidLength = ev.data.nfc.uidLength;
+            memcpy(queuedNfcUid, ev.data.nfc.uid, queuedNfcUidLength);
+            queuedNfcAvailable = true;
+        }
     }
 }
 
