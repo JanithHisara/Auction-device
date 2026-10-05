@@ -85,7 +85,7 @@ const char* awsEndpoint = "a1m322vfibs32e-ats.iot.ap-south-1.amazonaws.com";
 // ------------------ GLOBALS ------------------
 String deviceId = "";
 String clientId;
-String firmwareVersion = "1.0.0";
+String firmwareVersion = "4.5";
 String hardwareVersion = "1.0";
 
 Spinner spinner;
