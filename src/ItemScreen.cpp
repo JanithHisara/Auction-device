@@ -1,4 +1,4 @@
-﻿// #include "ItemScreen.h"
+// #include "ItemScreen.h"
 // #include "BidMQTT.h"
 // #include "NFCMQTT.h"
 // #include <cstring>
@@ -1265,10 +1265,17 @@ extern String lastNfcUid;
 
 // ================== HELPER FUNCTIONS ==================
 static void format_price(double price, const char* currency, char* buffer, size_t size) {
-    if (currency && strlen(currency) > 0) {
-        if (price >= 1000) snprintf(buffer, size, "%s %.0f", currency, price);
-        else snprintf(buffer, size, "%s %.2f", currency, price);
-    } else snprintf(buffer, size, "%.2f", price);
+    const char* curr = (currency && strlen(currency) > 0) ? currency : "Rs";
+    
+    if (price >= 1000000000.0) {
+        snprintf(buffer, size, "%s %.1fB", curr, price / 1000000000.0);
+    } else if (price >= 1000000.0) {
+        snprintf(buffer, size, "%s %.2fM", curr, price / 1000000.0);
+    } else if (price >= 1000.0) {
+        snprintf(buffer, size, "%s %.1fK", curr, price / 1000.0);
+    } else {
+        snprintf(buffer, size, "%s %.0f", curr, price);
+    }
 }
 
 static void format_remaining_time(int seconds, char* buffer, size_t size) {
@@ -1754,7 +1761,7 @@ void load_items_from_mqtt(const JsonArray& items_array, const char* auction_mode
         
         strlcpy((char*)item_list[i].item_id, item["Item_ID"] | "UNKNOWN", ITEM_ID_LEN);
         strlcpy((char*)item_list[i].name, item["Name"] | "Unknown", ITEM_NAME_LEN);
-        strlcpy((char*)item_list[i].currency, item["Currency"] | "$", ITEM_CURRENCY_LEN);
+        strlcpy((char*)item_list[i].currency, item["Currency"] | "Rs", ITEM_CURRENCY_LEN);
         strlcpy((char*)item_list[i].end_datetime, item["End_DateTime"] | "", 32);
         
         item_list[i].current_price = item["Current_Price"] | 0.0;
