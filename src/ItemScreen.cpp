@@ -1265,7 +1265,8 @@ extern String lastNfcUid;
 
 // ================== HELPER FUNCTIONS ==================
 static void format_price(double price, const char* currency, char* buffer, size_t size) {
-    const char* curr = (currency && strlen(currency) > 0) ? currency : "Rs";
+    // Force Rs regardless of what the server sends
+    const char* curr = "Rs";
     
     if (price >= 1000000000.0) {
         snprintf(buffer, size, "%s %.1fB", curr, price / 1000000000.0);
