@@ -1,4 +1,5 @@
-﻿#include <Wire.h>
+#include "I2CMutex.h"
+#include <Wire.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <logo.h>
@@ -995,11 +996,12 @@ void handlePinState() {
     }
 }
 
+bool bootComplete = false;
 TaskHandle_t PowerTask;
 void powerMonitorTask(void * parameter) {
     unsigned long pressStartTime = 0;
     while (true) {
-        if (millis() > 1000) { // Give it 1 second to boot before checking
+        if (bootComplete) { // Wait for setup to fully complete
             if (digitalRead(Latch_ISR) == HIGH) {
                 if (pressStartTime == 0) {
                     pressStartTime = millis();
@@ -1017,7 +1019,7 @@ void powerMonitorTask(void * parameter) {
                     pinMode(buzzer, INPUT); // Float buzzer
                     
                     digitalWrite(Latch_ON, LOW);
-                    while(true) delay(100); // Block until power dies
+                      vTaskSuspend(NULL); // Suspend task to avoid WDT crash
                 }
             } else {
                 pressStartTime = 0;
@@ -1053,6 +1055,7 @@ void setup() {
     pinMode(POWER_PIN, OUTPUT); 
     digitalWrite(POWER_PIN, HIGH);
     Wire.begin(SDA_PIN, SCL_PIN);
+    initI2CMutex();
 
     tft.begin();
     lvgl_init();
@@ -1087,7 +1090,9 @@ void setup() {
     // Remaining delay to complete ~2.8s logo display
     delay(2500);
 
+    lockI2C();
     if (!mcp.begin_I2C(0x20)) Serial.println("MCP not found!");
+    unlockI2C();
     keypad.begin(); 
     nfc.begin(); 
     battery.begin(); 
@@ -1149,6 +1154,7 @@ void setup() {
     initMQTTHandlers();
     Serial.println("System Ready");
     startupTime = millis();
+    bootComplete = true;
 }
 
 // ------------------ LOOP ------------------

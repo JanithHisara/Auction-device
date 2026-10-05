@@ -1,3 +1,4 @@
+#include "I2CMutex.h"
 // #include "Hardware.h"
 // // KeypadManager
 // KeypadManager::KeypadManager(Adafruit_MCP23X17* mcp, const uint8_t* rows, const uint8_t* cols, char keymap[5][3]) {
@@ -91,25 +92,30 @@ KeypadManager::KeypadManager(Adafruit_MCP23X17* mcp, const uint8_t* rows, const 
 }
 
 void KeypadManager::begin() {
+    lockI2C();
     for (int i = 0; i < 4; i++) _mcp->pinMode(_rowPins[i], INPUT_PULLUP);
     for (int i = 0; i < 4; i++) {
         _mcp->pinMode(_colPins[i], OUTPUT);
         _mcp->digitalWrite(_colPins[i], HIGH);
     }
+    unlockI2C();
 }
 
 char KeypadManager::scan() {
+    lockI2C();
     for (int c = 0; c < 4; c++) {
         _mcp->digitalWrite(_colPins[c], LOW);
         for (int r = 0; r < 4; r++) {
             if (_mcp->digitalRead(_rowPins[r]) == LOW) {
                 _mcp->digitalWrite(_colPins[c], HIGH);
-                return _keys[r][c];
+                unlockI2C();
+                  return _keys[r][c];
             }
         }
         _mcp->digitalWrite(_colPins[c], HIGH);
     }
-    return 0;
+      unlockI2C();
+      return 0;
 }
 
 //////////////////////
@@ -118,16 +124,22 @@ char KeypadManager::scan() {
 NFCManager::NFCManager(uint8_t irq, uint8_t reset): _nfc(irq, reset) {}
 
 void NFCManager::begin() {
+    lockI2C();
     _nfc.begin();
     if (!_nfc.getFirmwareVersion()) {
         Serial.println("PN532 not found!");
-        while(1);
+        unlockI2C();
+          while(1);
     }
     _nfc.SAMConfig();
+    unlockI2C();
 }
 
 bool NFCManager::readUID(uint8_t* uid, uint8_t* length) {
-    return _nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, length, 50);
+    lockI2C();
+    bool success = _nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, length, 50);
+    unlockI2C();
+    return success;
 }
 
 //////////////////////
@@ -145,30 +157,36 @@ void BatteryManager::setVoltageRange(float minV, float maxV) {
 }
 
 void BatteryManager::begin() {
+    lockI2C();
     Wire.beginTransmission(_addr);
     Wire.write(0x06); // quick start
     Wire.write(0x40);
     Wire.write(0x00);
     Wire.endTransmission();
+    unlockI2C();
 }
 
 float BatteryManager::readVoltage() {
+    lockI2C();
     Wire.beginTransmission(_addr);
     Wire.write(0x02);
     Wire.endTransmission(false);
 
     Wire.requestFrom(_addr, 2);
     uint16_t raw = (Wire.read()<<8) | Wire.read();
+    unlockI2C();
     return raw * 0.000078125;
 }
 
 float BatteryManager::readSOC() {
+    lockI2C();
     Wire.beginTransmission(_addr);
     Wire.write(0x04);
     Wire.endTransmission(false);
 
     Wire.requestFrom((uint8_t)_addr, (uint8_t)2);
     uint16_t raw = (Wire.read()<<8) | Wire.read();
+    unlockI2C();
     return (float)((raw >> 8) + (raw & 0xFF) / 256.0);
 }
 
