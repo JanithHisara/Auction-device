@@ -20,6 +20,46 @@
 #include <BidMQTT.h>
 #include <Spinner.h>
 #include "OTAUpdate.h"
+#include "I2CQueue.h"
+
+char queuedKey = '\0';
+bool queuedNfcAvailable = false;
+uint8_t queuedNfcUid[7];
+uint8_t queuedNfcUidLength = 0;
+
+char scanKeypadQueue() {
+    char key = queuedKey;
+    queuedKey = '\0';
+    return key;
+}
+
+void show_warning_timeout(const char* message, uint32_t timeout_ms);
+extern bool lowBatteryWarningShown;
+
+void processI2CQueue() {
+    I2CEvent ev;
+    while(xQueueReceive(i2cEventQueue, &ev, 0)) {
+        if (ev.type == EVENT_BATTERY_UPDATE) {
+            set_battery_percent(ev.data.battery.percentage);
+            
+            // Low battery logic
+            if (ev.data.battery.percentage <= 5 && !lowBatteryWarningShown) {
+                show_warning_timeout("\uF244 Low Battery!", 3000);
+                lowBatteryWarningShown = true;
+            } else if (ev.data.battery.percentage > 10) {
+                lowBatteryWarningShown = false;
+            }
+        } else if (ev.type == EVENT_KEYPAD_PRESS) {
+            if (queuedKey == '\0') { // Don't overwrite if main loop is slow
+                queuedKey = ev.data.keyPressed;
+            }
+        } else if (ev.type == EVENT_NFC_SCANNED) {
+            queuedNfcUidLength = ev.data.nfc.uidLength;
+            memcpy(queuedNfcUid, ev.data.nfc.uid, queuedNfcUidLength);
+            queuedNfcAvailable = true;
+        }
+    }
+}
 #include <vector>
 #include <Secret.h>
 
@@ -915,7 +955,7 @@ void handleNetwork() {
 void handlePinState() {
     static unsigned long lastKeyTime = 0;
     static char lastKeyProcessed = 0;
-    char key = keypad.scan();
+    char key = scanKeypadQueue();
     
     // Handle keypad input
     if (key != '\0') {
@@ -1096,6 +1136,9 @@ void setup() {
     keypad.begin(); 
     nfc.begin(); 
     battery.begin(); 
+    
+    initI2CQueue();
+    startI2CPollingTask();
    // leds.begin();
     btnOK2.begin(); 
     btnAPMode.begin(); 
@@ -1178,6 +1221,7 @@ void loop() {
     
     
 
+    processI2CQueue();   // Process background hardware events
     updateInputs();      // Buttons + keypad + NFC
 
     // Runtime AP mode switching disabled - button is now useless after startup per user request
@@ -1239,7 +1283,7 @@ void updateSystem() {
 void handleAuctionState() {
     // SW16 (# button) acts as Refresh for Auctions List
     static unsigned long lastRefreshTime = 0;
-    char key = keypad.scan();
+    char key = scanKeypadQueue();
     if (key == '#' && (millis() - lastRefreshTime > 1000)) {
         lastRefreshTime = millis();
         Serial.println(" SW16 (#) pressed: Refreshing auction list...");
@@ -1331,7 +1375,7 @@ void handleItemsState() {
 
     // SW16 (# button) acts as Refresh for Items List (when bid popup is closed)
     static unsigned long lastItemRefreshTime = 0;
-    char key = keypad.scan();
+    char key = scanKeypadQueue();
     if (key == '#' && (millis() - lastItemRefreshTime > 1000)) {
         lastItemRefreshTime = millis();
         Serial.println(" SW16 (#) pressed: Refreshing items list...");
@@ -1356,7 +1400,7 @@ void handleBidWaitNFCState() {
 void handleBidPopupInput() {
     static unsigned long lastKeyTime = 0;
     const uint16_t keyDebounceDelay = 180;
-    char key = keypad.scan();
+    char key = scanKeypadQueue();
     if (key == '\0') return;
     if (millis() - lastKeyTime < keyDebounceDelay) return;
     lastKeyTime = millis();
