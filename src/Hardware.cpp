@@ -186,10 +186,24 @@ float BatteryManager::readSOC() {
 
 float BatteryManager::readPercent() {
     float soc = readSOC();
-    float pct = ((soc - 20.0) / (90.0 - 20.0)) * 100.0;
-    if(pct < 0) pct = 0;
-    if(pct > 100) pct = 100;
-    return pct;
+    float rawPct = ((soc - 20.0) / (90.0 - 20.0)) * 100.0;
+    if(rawPct < 0) rawPct = 0;
+    if(rawPct > 100) rawPct = 100;
+
+    static float displayedPct = -1;
+
+    if (displayedPct < 0) {
+        displayedPct = rawPct;
+    } else {
+        if (rawPct < displayedPct) {
+            displayedPct = rawPct; // Always follow discharge
+        } else if (rawPct >= displayedPct + 1.5) {
+            displayedPct += 1.0; // Slowly climb to smooth out charging jumps
+        } else if (rawPct >= 99.5) {
+            displayedPct = 100.0; // Ensure it can reach exactly 100%
+        }
+    }
+    return displayedPct;
 }
 
 //////////////////////
