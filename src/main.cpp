@@ -1,4 +1,4 @@
-#include "I2CMutex.h"
+﻿#include "I2CMutex.h"
 #include <Wire.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -85,7 +85,7 @@ const char* awsEndpoint = "a1m322vfibs32e-ats.iot.ap-south-1.amazonaws.com";
 // ------------------ GLOBALS ------------------
 String deviceId = "";
 String clientId;
-String firmwareVersion = "4.5";
+String firmwareVersion = "4.6";
 String hardwareVersion = "1.0";
 
 Spinner spinner;
