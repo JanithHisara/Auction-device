@@ -256,7 +256,7 @@ export async function placeBid(bidData, auctionMode = "OPEN") {
   // 1 Get gem
   const { data: gem, error: gemError } = await supabase
     .from("gems")
-    .select("id, round_end_time")
+    .select("id, round_end_time, end_time, auctions(status, auction_end)")
     .eq("id", bidData.gem_id)
     .single();
 
