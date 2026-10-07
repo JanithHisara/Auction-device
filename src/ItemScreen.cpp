@@ -1708,7 +1708,14 @@ void load_items_from_mqtt(const JsonArray& items_array, const char* auction_mode
                 } else {
                     lv_label_set_text(item_loading_label, "The auction has finished. Thank you for participating!");
                 }
-            } else if (!stat.equalsIgnoreCase("live") && !stat.equalsIgnoreCase("open")) { 
+            } else if (stat.equalsIgnoreCase("bidding closed")) {
+                if (hasUser) {
+                    snprintf(loading_msg, sizeof(loading_msg), "%s, bidding time is finished and results will be announced soon.", userName);
+                    lv_label_set_text(item_loading_label, loading_msg);
+                } else {
+                    lv_label_set_text(item_loading_label, "Bidding time is finished and results will be announced soon.");
+                }
+            } else if (!stat.equalsIgnoreCase("live") && !stat.equalsIgnoreCase("open") && !stat.equalsIgnoreCase("bidding open")) { 
                 if (hasUser) {
                     snprintf(loading_msg, sizeof(loading_msg), "%s, this auction is not live yet. Please wait.", userName);
                     lv_label_set_text(item_loading_label, loading_msg);

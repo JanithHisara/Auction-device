@@ -87,11 +87,15 @@ async function getAuctionItems(auctionId, userId = null) {
     const auction = cache.auctions.find(a => a.id === auctionUuid);
     const auctionMode = mapAuctionMode(auction?.auction_type);
 
-    if (!itemsData || itemsData.count === 0) {
+    const mappedStatus = mapAuctionStatus(auction);
+    const isTender = auction?.auction_type === 'tender_base_fixed_bid';
+    const hideItems = isTender && auction.status !== 'live';
+
+    if (!itemsData || itemsData.count === 0 || hideItems) {
       return {
         Auction_ID: auctionId,
         Auction_Mode: auctionMode,
-        Auction_Status: auction?.status?.toUpperCase() || "LIVE",
+        Auction_Status: mappedStatus,
         Items: [],
         Items_Count: 0
       };
@@ -149,7 +153,7 @@ async function getAuctionItems(auctionId, userId = null) {
     return {
       Auction_ID: auctionId,
       Auction_Mode: auctionMode,
-      Auction_Status: auction?.status?.toUpperCase() || "LIVE",
+      Auction_Status: mappedStatus,
       Items: resolvedItems,
       Items_Count: resolvedItems.length
     };
@@ -159,9 +163,21 @@ async function getAuctionItems(auctionId, userId = null) {
   }
 }
 
-function mapAuctionStatus(status) {
-  if (!status) return "LIVE";
-  status = status.toLowerCase();
+function mapAuctionStatus(auction) {
+  if (!auction || !auction.status) return "LIVE";
+  let status = auction.status.toLowerCase();
+  
+  // Use specific statuses for sealed bid auctions
+  const isTender = auction.auction_type === 'tender_base_fixed_bid';
+  if (isTender) {
+    if (status === 'registration_open') return "REGISTRATION OPEN";
+    if (status === 'live') return "BIDDING OPEN";
+    if (status === 'registration_closed') return "BIDDING CLOSED";
+    if (status === 'ended' || status === 'completed') return "FINISHED";
+    return status.toUpperCase();
+  }
+
+  // Legacy fallback for others
   if (status === 'registration_closed' || status === 'ended' || status === 'completed') {
       return "FINISHED";
   }
@@ -396,7 +412,7 @@ export const handler = async (event) => {
                 response.Current_Highest_Bid = parseFloat(bidAmount);
                 response.Next_Min_Bid = parseFloat(bidAmount);
                 response.Auction_Mode = mapAuctionMode(auction);
-                response.Auction_Status = mapAuctionStatus(auction?.status);
+                response.Auction_Status = mapAuctionStatus(auction);
               } else if (bidResult.error === "ELIMINATED") {
                   response.Status = "FAILED";
                   response.Bid_Status = "REJECTED";
