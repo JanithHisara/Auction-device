@@ -159,6 +159,15 @@ async function getAuctionItems(auctionId, userId = null) {
   }
 }
 
+function mapAuctionStatus(status) {
+  if (!status) return "LIVE";
+  status = status.toLowerCase();
+  if (status === 'registration_closed' || status === 'ended' || status === 'completed') {
+      return "FINISHED";
+  }
+  return status.toUpperCase();
+}
+
 // Function to place bid
 async function placeBid(bidData, auctionUuid, auctionMode) {
   console.log("   Placing bid:", JSON.stringify(bidData, null, 2));
@@ -387,7 +396,7 @@ export const handler = async (event) => {
                 response.Current_Highest_Bid = parseFloat(bidAmount);
                 response.Next_Min_Bid = parseFloat(bidAmount);
                 response.Auction_Mode = mapAuctionMode(auction);
-                response.Auction_Status = auction?.status?.toUpperCase() || "LIVE";
+                response.Auction_Status = mapAuctionStatus(auction?.status);
               } else if (bidResult.error === "ELIMINATED") {
                   response.Status = "FAILED";
                   response.Bid_Status = "REJECTED";
