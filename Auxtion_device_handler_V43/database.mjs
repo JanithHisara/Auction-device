@@ -266,10 +266,16 @@ export async function placeBid(bidData, auctionMode = "OPEN") {
 
   // 2 Check round end
   const now = new Date().getTime();
-  const roundEnd = new Date(gem.round_end_time).getTime();
-  if (now >= roundEnd) {
-    throw new Error("ROUND_ENDED");
-  }
+    let endTimeStr = gem.round_end_time || (gem.auctions ? gem.auctions.auction_end : null) || gem.end_time;
+    if (gem.auctions && gem.auctions.status && gem.auctions.status !== 'live') {
+      throw new Error("ROUND_ENDED");
+    }
+    if (endTimeStr && !endTimeStr.startsWith('2099')) {
+      const roundEnd = new Date(endTimeStr).getTime();
+      if (now >= roundEnd) {
+        throw new Error("ROUND_ENDED");
+      }
+    }
 
   const isClosed = auctionMode.toUpperCase().includes("CLOSED") || 
                    auctionMode.toUpperCase().includes("SEALED") || 
@@ -354,7 +360,7 @@ export async function placeBid(bidData, auctionMode = "OPEN") {
 export async function fetchGemById(gemId) {
   const { data, error } = await supabase
     .from("gems")
-    .select("id, round_end_time")
+    .select("id, round_end_time, end_time, auctions(auction_end, auction_type, status)")
     .eq("id", gemId)
     .single();
 

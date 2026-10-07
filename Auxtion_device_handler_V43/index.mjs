@@ -353,21 +353,26 @@ export const handler = async (event) => {
         } else {
           // Check round end time
           const gemData = await fetchGemById(gemUuid);
-          if (!gemData || !gemData.round_end_time) {
-            response.Status = "FAILED";
-            response.Bid_Status = "REJECTED";
-            response.Reason = 6;
-          } else {
-            const now = new Date();
-            const roundEnd = new Date(gemData.round_end_time);
-
-            if (now > roundEnd) {
+            let endTimeStr = gemData ? (gemData.round_end_time || (gemData.auctions ? gemData.auctions.auction_end : null) || gemData.end_time) : null;
+            if (!gemData || !endTimeStr) {
               response.Status = "FAILED";
               response.Bid_Status = "REJECTED";
-              response.Reason = 7;
+              response.Reason = 6;
             } else {
-              // ??? ROUND ACTIVE -> allow bid
-              const auction = auctionCache.auctions.find(a => a.id === auctionUuid);
+              const now = new Date();
+              const roundEnd = new Date(endTimeStr);
+
+              if (gemData.auctions && gemData.auctions.status && gemData.auctions.status !== 'live') {
+                response.Status = "FAILED";
+                response.Bid_Status = "REJECTED";
+                response.Reason = 7;
+              } else if (now > roundEnd && !endTimeStr.startsWith('2099')) {
+                response.Status = "FAILED";
+                response.Bid_Status = "REJECTED";
+                response.Reason = 7;
+              } else {
+                // ??? ROUND ACTIVE -> allow bid
+                const auction = auctionCache.auctions.find(a => a.id === auctionUuid);
                 const auctionModeForBid = mapAuctionMode(auction);
                 const bidResult = await placeBid({
                   gem_id: gemUuid,

@@ -191,7 +191,7 @@ public:
     
     // ==================== BID METHODS ====================
     bool submitBid(const char* auctionId, const char* itemId, const char* nfcUid,
-                   float bidAmount, const char* currency = "$", 
+                   float bidAmount, const char* currency = "LKR", 
                    const char* messageId = nullptr);
     void onBidResult(BidHandler handler);
     const BidResult& getBidResult() const { return _lastBidResult; }
