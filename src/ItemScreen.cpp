@@ -524,6 +524,7 @@
 //         strlcpy((char*)item_list[i].name, item["Name"] | "Unknown", ITEM_NAME_LEN);
 //         strlcpy((char*)item_list[i].currency, item["Currency"] | "LKR", ITEM_CURRENCY_LEN);
 //         strlcpy((char*)item_list[i].end_datetime, item["End_DateTime"] | "", 32);
+        strlcpy((char*)item_list[i].status, item["Status"] | "", 16);
         
 //         item_list[i].current_price = item["Current_Price"] | 0.0;
 //         item_list[i].next_min_bid = item["Next_Min_Bid"] | 0.0;
@@ -1765,12 +1766,14 @@ void load_items_from_mqtt(const JsonArray& items_array, const char* auction_mode
             item_list[i].name = new char[ITEM_NAME_LEN];
             item_list[i].currency = new char[ITEM_CURRENCY_LEN];
             item_list[i].end_datetime = new char[32];
+            item_list[i].status = new char[16];
         }
         
         strlcpy((char*)item_list[i].item_id, item["Item_ID"] | "UNKNOWN", ITEM_ID_LEN);
         strlcpy((char*)item_list[i].name, item["Name"] | "Unknown", ITEM_NAME_LEN);
         strlcpy((char*)item_list[i].currency, item["Currency"] | "Rs", ITEM_CURRENCY_LEN);
         strlcpy((char*)item_list[i].end_datetime, item["End_DateTime"] | "", 32);
+        strlcpy((char*)item_list[i].status, item["Status"] | "", 16);
         
         item_list[i].current_price = item["Current_Price"] | 0.0;
         item_list[i].next_min_bid = item["Next_Min_Bid"] | 0.0;
@@ -1916,6 +1919,13 @@ void update_item_display() {
             current_item_data.your_bid_submitted ? "UPDATE BID" : "PLACE BID");
     }
 
+    // Hide place bid button if item is not active
+    if (current_item_data.status != nullptr && strcmp(current_item_data.status, "active") != 0) {
+        lv_obj_add_flag(item_place_bid_btn, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_clear_flag(item_place_bid_btn, LV_OBJ_FLAG_HIDDEN);
+    }
+
     // =========================================================
     // ------------------ TIMER -------------------------------
     // =========================================================
@@ -2015,6 +2025,7 @@ double get_current_bid_amount() { return current_item_data.next_min_bid; }
 
 static void show_bid_popup() {
     if (!screen_visible || item_count == 0 || bid_popup_active) return;
+    if (current_item_data.status != nullptr && strcmp(current_item_data.status, "active") != 0) return;
     
     bid_popup_active = true;
     
